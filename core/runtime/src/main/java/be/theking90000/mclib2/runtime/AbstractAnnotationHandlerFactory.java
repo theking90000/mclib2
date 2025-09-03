@@ -12,7 +12,7 @@ public abstract class AbstractAnnotationHandlerFactory implements AnnotationHand
     }
 
     protected boolean isFactory(Class<? extends AnnotationHandlerFactory> clazz) {
-        if (clazz == null) return true;
+        if (clazz == null) return false;
 
         return clazz.isAssignableFrom(this.getClass());
     }

@@ -32,6 +32,10 @@ import java.util.Set;
 public class AnnotationBootstrap {
     private final AnnotationHandlerFactory factory;
 
+    public AnnotationBootstrap() {
+        this.factory = new DefaultAnnotationHandlerFactory();
+    }
+
     public AnnotationBootstrap(AnnotationHandlerFactory factory) {
         this.factory = factory;
     }
@@ -51,11 +55,9 @@ public class AnnotationBootstrap {
             Set<Class<? extends AnnotationHandler<?>>> handlerClasses = result.getHandlers(annotation);
             Set<Class<?>> annotatedClasses = result.getAnnotatedClasses(annotation);
 
-            for (Class<? extends AnnotationHandler<?>> handlerClass : handlerClasses) {
+            for (Class<? extends AnnotationHandler> handlerClass : handlerClasses) {
                 try {
-                    if (factory.supports(handlerClass)) {
-                        createHandlerClass(handlerClass, annotatedClasses);
-                    }
+                    createHandlerClass(handlerClass, annotatedClasses);
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to bootstrap handler: " + handlerClass, e);
                 }
@@ -64,10 +66,12 @@ public class AnnotationBootstrap {
     }
 
     private <T extends AnnotationHandler<V>, V> void createHandlerClass(Class<T> handlerClass, Set<Class<?>> annotatedClasses) throws Exception {
-        AnnotationHandler<V> handler = factory.create(handlerClass);
+        if (factory.supports(handlerClass)) {
+            AnnotationHandler<V> handler = factory.create(handlerClass);
 
-        for (Class<?> annotatedClass : annotatedClasses) {
-            handler.handle((Class<V>) annotatedClass);
+            for (Class<?> annotatedClass : annotatedClasses) {
+                handler.handle((Class<V>) annotatedClass);
+            }
         }
     }
 

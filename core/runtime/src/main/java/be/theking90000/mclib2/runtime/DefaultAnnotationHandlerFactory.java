@@ -9,6 +9,6 @@ public class DefaultAnnotationHandlerFactory extends AbstractAnnotationHandlerFa
 
     @Override
     protected boolean isFactory(Class<? extends AnnotationHandlerFactory> clazz) {
-        return clazz == null || super.isFactory(clazz);
+        return clazz == null || clazz.isAssignableFrom(this.getClass());
     }
 }
