@@ -1,0 +1,13 @@
+rootProject.name = "mclib2"
+
+include(
+        "core:annotation-system:api",
+        "core:annotation-system:processor",
+        "core:runtime",
+/*      "integrations:guice",
+        "platform:plugin-system",
+        "platform:bukkit-adapter",
+        "platform:velocity-adapter",
+        "examples:money-lib",
+        "examples:shop-lib" */
+)
