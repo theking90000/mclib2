@@ -20,22 +20,32 @@ import java.util.Set;
  * <p>Typical usage:</p>
  * <pre>{@code
  * // With default factory
- * AnnotationBootstrap bootstrap = new AnnotationBootstrap(new DefaultAnnotationHandlerFactory());
- * bootstrap.bootstrap();
+ * AnnotationBootstrap bootstrap = new AnnotationBootstrap();
+ * AnnotationDiscovery discovery = new AnnotationDiscovery();
+ * bootstrap.bootstrap(discovery.discover());
  *
  * // With Guice
  * Injector injector = Guice.createInjector(new MyAppModule());
  * AnnotationBootstrap bootstrap = new AnnotationBootstrap(new GuiceAnnotationHandlerFactory(injector));
- * bootstrap.bootstrap();
+ * bootstrap.bootstrap(new AnnotationDiscovery().discover());
  * }</pre>
  */
 public class AnnotationBootstrap {
     private final AnnotationHandlerFactory factory;
 
+    /**
+     * Creates a bootstrapper using the default factory
+     * (which uses no-arg constructor instantiation).
+     */
     public AnnotationBootstrap() {
         this.factory = new DefaultAnnotationHandlerFactory();
     }
 
+    /**
+     * Creates a bootstrapper using the given factory.
+     *
+     * @param factory the factory to use for instantiating handlers
+     */
     public AnnotationBootstrap(AnnotationHandlerFactory factory) {
         this.factory = factory;
     }

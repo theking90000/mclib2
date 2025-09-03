@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 public @interface InjectStrategy {
     /**
      * The factory class allowed instantiating the loader.
+     * @return the factory class
      */
     Class<? extends AnnotationHandlerFactory> value();
 }

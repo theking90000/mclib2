@@ -87,6 +87,7 @@ public interface AnnotationHandlerFactory {
      *
      * @param loaderClass the handler class to check
      * @param <T> the type of the handler
+     * @param <V> the type of the annotation value the handler processes
      * @return {@code true} if this factory supports creating instances
      *         of the given class, {@code false} otherwise
      */

@@ -15,7 +15,7 @@ import java.util.*;
  * <ul>
  *   <li>{@code META-INF/services/be.theking90000.mclib2.runtime.AnnotationHandler}
  *       to find all available handler classes.</li>
- *   <li>{@code META-INF/annotations/<AnnotationName>}
+ *   <li>{@code META-INF/annotations-mappings.txt}
  *       to find all classes annotated with a given annotation.</li>
  * </ul>
  *
@@ -26,10 +26,18 @@ public class AnnotationDiscovery {
 
     private final ClassLoader classLoader;
 
+    /**
+     * Creates a discovery instance using the given class loader.
+     *
+     * @param classLoader the class loader to use for resource loading
+     */
     public AnnotationDiscovery(ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
 
+    /**
+     * Creates a discovery instance using the current thread's context class loader.
+     */
     public AnnotationDiscovery() {
         this(Thread.currentThread().getContextClassLoader());
     }
