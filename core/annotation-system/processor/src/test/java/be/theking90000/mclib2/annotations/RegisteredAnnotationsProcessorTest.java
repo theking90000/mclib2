@@ -90,7 +90,7 @@ public class RegisteredAnnotationsProcessorTest {
                 "be.theking90000.test.ServiceLoader",
                 "package be.theking90000.test;\n" +
                         "import be.theking90000.mclib2.annotations.AnnotationLoader;\n" +
-                        "import be.theking90000.mclib2.annotations.AnnotationHandler;\n" +
+                        "import be.theking90000.mclib2.runtime.AnnotationHandler;\n" +
                         "@AnnotationLoader(Service.class)\n" +
                         "public abstract class ServiceLoader implements AnnotationHandler<Service> {}\n"
         );
@@ -112,7 +112,7 @@ public class RegisteredAnnotationsProcessorTest {
                 "be.theking90000.test.ServiceLoader",
                 "package be.theking90000.test;\n" +
                         "import be.theking90000.mclib2.annotations.AnnotationLoader;\n" +
-                        "import be.theking90000.mclib2.annotations.AnnotationHandler;\n" +
+                        "import be.theking90000.mclib2.runtime.AnnotationHandler;\n" +
                         "@AnnotationLoader(Service.class)\n" +
                         "public class ServiceLoader implements AnnotationHandler<Service> {\n" +
                         "    public void handle(Class<? extends Service> clazz) {}\n" +
@@ -128,7 +128,7 @@ public class RegisteredAnnotationsProcessorTest {
         assertThat(compilation)
                 .generatedFile(
                         javax.tools.StandardLocation.CLASS_OUTPUT,
-                        "META-INF/services/be.theking90000.mclib2.annotations.AnnotationHandler"
+                        "META-INF/services/be.theking90000.mclib2.runtime.AnnotationHandler"
                 )
                 .contentsAsUtf8String()
                 .contains("be.theking90000.test.ServiceLoader");

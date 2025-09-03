@@ -1,4 +1,7 @@
-package be.theking90000.mclib2.annotations;
+package be.theking90000.mclib2.runtime;
+
+import be.theking90000.mclib2.annotations.AnnotationLoader;
+import be.theking90000.mclib2.annotations.RegisteredAnnotation;
 
 /**
  * SPI (Service Provider Interface) for handling classes annotated

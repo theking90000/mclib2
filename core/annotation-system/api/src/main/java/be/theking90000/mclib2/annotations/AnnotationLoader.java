@@ -1,5 +1,7 @@
 package be.theking90000.mclib2.annotations;
 
+import be.theking90000.mclib2.runtime.AnnotationHandler;
+
 import java.lang.annotation.*;
 
 /**
@@ -29,7 +31,7 @@ import java.lang.annotation.*;
  * }
  * }</pre>
  */
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface AnnotationLoader {
     /**

@@ -1,5 +1,6 @@
 package be.theking90000.mclib2.annotations;
 
+import be.theking90000.mclib2.runtime.AnnotationHandler;
 import com.google.auto.service.AutoService;
 
 import javax.annotation.processing.*;
