@@ -64,12 +64,29 @@ public interface AnnotationHandlerFactory {
      *
      * @param loaderClass the concrete class of the {@link AnnotationHandler}
      *                    to instantiate
-     * @param <T> the type of the handler
-     * @param <V> the type of the annotation value the handler processes
+     * @param <T>         the type of the handler
+     * @param <V>         the type of the annotation value the handler processes
      * @return a fully constructed instance of the handler
      * @throws Exception if the handler cannot be instantiated
      */
     <T extends AnnotationHandler<V>, V> T create(Class<T> loaderClass) throws Exception;
+
+    /**
+     * Destroys a previously created handler instance.
+     *
+     * <p>Implementations may:
+     * <ul>
+     *   <li>Call {@link AnnotationHandler#destroy()} on the handler.</li>
+     *   <li>Unregister it from a DI container.</li>
+     *   <li>Release any resources associated with it.</li>
+     * </ul>
+     *
+     * @param handler the handler instance to destroy
+     * @param <T>     the handler type
+     * @param <V>     the annotation type the handler supports
+     * @throws Exception if cleanup fails
+     */
+    <T extends AnnotationHandler<V>, V> void destroy(T handler) throws Exception;
 
     /**
      * Determines whether this factory supports instantiating the given
@@ -86,10 +103,10 @@ public interface AnnotationHandlerFactory {
      * first one that returns {@code true}.</p>
      *
      * @param loaderClass the handler class to check
-     * @param <T> the type of the handler
-     * @param <V> the type of the annotation value the handler processes
+     * @param <T>         the type of the handler
+     * @param <V>         the type of the annotation value the handler processes
      * @return {@code true} if this factory supports creating instances
-     *         of the given class, {@code false} otherwise
+     * of the given class, {@code false} otherwise
      */
     <T extends AnnotationHandler<V>, V> boolean supports(Class<T> loaderClass);
 

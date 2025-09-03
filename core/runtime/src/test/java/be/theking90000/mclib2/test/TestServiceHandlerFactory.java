@@ -16,4 +16,9 @@ public class TestServiceHandlerFactory implements AnnotationHandler<Service> {
     public void handle(Class<? extends Service> clazz) throws Exception {
         handled.add(clazz);
     }
+
+    @Override
+    public void destroy() throws Exception {
+        handled.clear();
+    }
 }

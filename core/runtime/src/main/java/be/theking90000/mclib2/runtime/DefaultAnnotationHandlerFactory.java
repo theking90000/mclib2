@@ -11,6 +11,11 @@ public class DefaultAnnotationHandlerFactory extends AbstractAnnotationHandlerFa
     }
 
     @Override
+    public <T extends AnnotationHandler<V>, V> void destroy(T handler) throws Exception {
+        handler.destroy();
+    }
+
+    @Override
     protected boolean isFactory(Class<? extends AnnotationHandlerFactory> clazz) {
         return clazz == null || clazz.isAssignableFrom(this.getClass());
     }

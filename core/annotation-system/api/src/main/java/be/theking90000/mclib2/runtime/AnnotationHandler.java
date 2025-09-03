@@ -33,4 +33,14 @@ public interface AnnotationHandler<T> {
      * @throws Exception if the handler cannot process the class
      */
     void handle(Class<? extends T> clazz) throws Exception;
+
+    /**
+     * Called when the system is shutting down or reloading.
+     * Handlers should unregister services, listeners, etc.
+     * This method is called by default by DefaultAnnotationHandlerFactory, if not {@link be.theking90000.mclib2.annotations.InjectStrategy} is specified.
+     * Then it will be called when Bootstrapper is shutting down.
+     */
+    default void destroy() throws Exception {
+        // no-op by default
+    }
 }

@@ -3,6 +3,8 @@ package be.theking90000.mclib2.runtime;
 import be.theking90000.mclib2.annotations.InjectStrategy;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -32,6 +34,7 @@ import java.util.Set;
  */
 public class AnnotationBootstrap {
     private final AnnotationHandlerFactory factory;
+    private final List<AnnotationHandler<?>> activeHandlers = new ArrayList<>();
 
     /**
      * Creates a bootstrapper using the default factory
@@ -79,11 +82,27 @@ public class AnnotationBootstrap {
         if (factory.supports(handlerClass)) {
             AnnotationHandler<V> handler = factory.create(handlerClass);
 
+            activeHandlers.add(handler);
+
             for (Class<?> annotatedClass : annotatedClasses) {
                 handler.handle((Class<V>) annotatedClass);
             }
         }
     }
 
+    /**
+     * Shuts down the system, calling {@link AnnotationHandlerFactory#destroy(AnnotationHandler)}}
+     * on all active handlers.
+     */
+    public void shutdown() {
+        for (AnnotationHandler<?> handler : activeHandlers) {
+            try {
+                factory.destroy(handler);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to destroy handler: " + handler.getClass(), e);
+            }
+        }
+        activeHandlers.clear();
+    }
 
 }
