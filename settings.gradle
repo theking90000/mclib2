@@ -4,6 +4,7 @@ include(
         "core:annotation-system:api",
         "core:annotation-system:processor",
         "core:runtime",
+        "platform:boot"
 /*      "integrations:guice",
         "platform:plugin-system",
         "platform:bukkit-adapter",
