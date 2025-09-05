@@ -1,0 +1,9 @@
+tasks.named("jar", Jar) {
+    manifest {
+        from("src/main/resources/META-INF/MANIFEST.MF")
+    }
+}
+
+dependencies {
+    implementation project(':platform:boot')
+}

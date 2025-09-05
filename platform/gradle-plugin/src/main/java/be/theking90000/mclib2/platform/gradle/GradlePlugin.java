@@ -15,6 +15,10 @@ import org.gradle.jvm.tasks.Jar;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 public class GradlePlugin implements Plugin<Project> {
 
@@ -44,14 +48,18 @@ public class GradlePlugin implements Plugin<Project> {
                     target.getDependencies().add("implementation", dRes.resolve(s));
                 }
             }
+            for (String s : BOOTSTRAP) {
+                // Unsure about it, maybe add only annotation @PlatformEntrypoint as compileOnly?
+                target.getDependencies().add("compileOnly", dRes.resolve(s));
+            }
         });
 
         Configuration runtime = createConfiguration(target, "MCLib2Runtime");
         runtime.extendsFrom(target.getConfigurations().getByName("runtimeClasspath"));
 
-        Configuration bootstrapLibs = createConfiguration(target, "MCLib2BootstrapLibs");
 
         TaskProvider<Jar> codeJar = target.getTasks().register("codeJar", Jar.class, jar -> {
+            jar.setGroup("mclib2");
             jar.getArchiveBaseName().set("code");
             SourceSetContainer sourceSets = target.getExtensions().getByType(SourceSetContainer.class);
             jar.from(sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).getOutput());
@@ -59,6 +67,8 @@ public class GradlePlugin implements Plugin<Project> {
 
         TaskProvider<GeneratePluginDescriptor> descriptor = target.getTasks()
                 .register("generatePluginDescriptor", GeneratePluginDescriptor.class, task -> {
+                    task.setGroup("mclib2");
+
                     task.dependsOn(codeJar);
 
                     task.getCodeFile().set(codeJar.flatMap(Jar::getArchiveFile));
@@ -69,6 +79,8 @@ public class GradlePlugin implements Plugin<Project> {
 
         TaskProvider<GeneratePluginDescriptor> descriptorDev = target.getTasks()
                 .register("generatePluginDescriptorDev", GeneratePluginDescriptor.class, task -> {
+                    task.setGroup("mclib2");
+
                     task.dependsOn("build");
 
                     SourceSetContainer sourceSets = target.getExtensions().getByType(SourceSetContainer.class);
@@ -84,6 +96,45 @@ public class GradlePlugin implements Plugin<Project> {
 
         // Standalone entrypoint : TODO
 
+        TaskProvider<Jar> standaloneJar = target.getTasks().register("standaloneJar", Jar.class, jar -> {
+            jar.setGroup("mclib2");
+
+            jar.getArchiveBaseName().set(target.getName() + "-standalone");
+
+            Configuration bootstrapStandalone = createConfiguration(target, "MCLib2BootstrapStandalone");
+            bootstrapStandalone.getDependencies().add(dRes.resolve("be.theking90000.mclib2:platform-standalone-adapter", "be.theking90000.mclib2:standalone-adapter"));
+
+            jar.dependsOn(bootstrapStandalone);
+
+            jar.from(codeJar, copy -> copy.into("libs"));
+            jar.from(descriptor, copy -> copy.into(".").rename(f -> "plugin-descriptor.dat"));
+
+            jar.from(target.provider(() ->
+                    bootstrapStandalone.resolve().stream()
+                            .map(dep -> target.zipTree(dep))
+                            .collect(Collectors.toList())
+            ));
+
+            jar.doFirst(task -> {
+                File depJar = bootstrapStandalone.resolve().iterator().next();
+                try (JarFile jf = new JarFile(depJar)) {
+                    Manifest depManifest = jf.getManifest();
+                    if (depManifest != null) {
+                        // Clear Gradle’s default manifest
+                        jar.getManifest().getAttributes().clear();
+
+                        // Copy all attributes from dependency manifest
+                        depManifest.getMainAttributes().forEach((key, value) -> {
+                            jar.getManifest().getAttributes().put(key.toString(), value);
+                        });
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to read manifest from dependency: " + depJar, e);
+                }
+            });
+
+
+        });
     }
 
     public static String getVersion() {

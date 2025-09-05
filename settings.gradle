@@ -10,6 +10,7 @@ include(
         "core:runtime",
         "platform:boot",
         "platform:gradle-plugin",
+        "platform:standalone-adapter"
 /*      "integrations:guice",
         "platform:plugin-system",
         "platform:bukkit-adapter",

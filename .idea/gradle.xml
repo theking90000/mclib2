@@ -17,6 +17,7 @@
             <option value="$PROJECT_DIR$/platform" />
             <option value="$PROJECT_DIR$/platform/boot" />
             <option value="$PROJECT_DIR$/platform/gradle-plugin" />
+            <option value="$PROJECT_DIR$/platform/standalone-adapter" />
           </set>
         </option>
       </GradleProjectSettings>
@@ -35,6 +36,7 @@
                   <project path="$PROJECT_DIR$/platform" />
                   <project path="$PROJECT_DIR$/platform/boot" />
                   <project path="$PROJECT_DIR$/platform/gradle-plugin" />
+                  <project path="$PROJECT_DIR$/platform/standalone-adapter" />
                 </projects>
               </build>
             </builds>
@@ -54,6 +56,7 @@
             <option value="$PROJECT_DIR$/platform" />
             <option value="$PROJECT_DIR$/platform/boot" />
             <option value="$PROJECT_DIR$/platform/gradle-plugin" />
+            <option value="$PROJECT_DIR$/platform/standalone-adapter" />
           </set>
         </option>
       </GradleProjectSettings>

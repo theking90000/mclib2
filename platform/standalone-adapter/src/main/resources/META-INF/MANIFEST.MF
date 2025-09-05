@@ -1,0 +1,2 @@
+Manifest-Version: 1.0
+Main-Class: be.theking90000.mclib2.platform.adapter.StandaloneAdapter

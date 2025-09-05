@@ -21,17 +21,25 @@ public class DependencyResolver {
         return MCLib2Extension.getVersion().get();
     }
 
-    public Dependency resolve(String dependency) {
+    public Dependency resolve(String dependency, String projectPath) {
         if (useProjectLinking()) {
-            String[] parts = dependency.split(":");
-            String[] pNames = parts[1].split("-");
-            dependency = parts[0] + ':' + pNames[pNames.length - 1];
+            if (projectPath != null) {
+                dependency = projectPath;
+            } else {
+                String[] parts = dependency.split(":");
+                String[] pNames = parts[1].split("-");
+                dependency = parts[0] + ':' + pNames[pNames.length - 1];
+            }
             // String pName = dependency.split(":")[1].replaceAll("-", ":");
 
             //return project.getDependencies().create(pName + ":" + getVersion());
         }
 
         return project.getDependencies().create(dependency + ":" + getVersion());
+    }
+
+    public Dependency resolve(String dependency) {
+        return resolve(dependency, null);
     }
 
 }
