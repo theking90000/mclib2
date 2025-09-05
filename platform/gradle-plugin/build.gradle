@@ -1,0 +1,22 @@
+plugins {
+    id 'java-gradle-plugin'
+}
+
+gradlePlugin {
+    plugins {
+        mclib2 {
+            id = 'mclib2-plugin'
+            implementationClass = 'be.theking90000.mclib2.platform.gradle.GradlePlugin'
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes("Implementation-Version": project.version)
+    }
+}
+
+dependencies {
+    implementation project(':platform:boot')
+}

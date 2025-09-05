@@ -1,10 +1,15 @@
+pluginManagement {
+  //  includeBuild("./platform/gradle-plugin")
+}
+
 rootProject.name = "mclib2"
 
 include(
         "core:annotation-system:api",
         "core:annotation-system:processor",
         "core:runtime",
-        "platform:boot"
+        "platform:boot",
+        "platform:gradle-plugin",
 /*      "integrations:guice",
         "platform:plugin-system",
         "platform:bukkit-adapter",

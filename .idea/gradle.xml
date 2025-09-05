@@ -16,6 +16,44 @@
             <option value="$PROJECT_DIR$/core/runtime" />
             <option value="$PROJECT_DIR$/platform" />
             <option value="$PROJECT_DIR$/platform/boot" />
+            <option value="$PROJECT_DIR$/platform/gradle-plugin" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$" name="mclib2">
+                <projects>
+                  <project path="$PROJECT_DIR$" />
+                  <project path="$PROJECT_DIR$/core" />
+                  <project path="$PROJECT_DIR$/core/annotation-system" />
+                  <project path="$PROJECT_DIR$/core/annotation-system/api" />
+                  <project path="$PROJECT_DIR$/core/annotation-system/processor" />
+                  <project path="$PROJECT_DIR$/core/runtime" />
+                  <project path="$PROJECT_DIR$/platform" />
+                  <project path="$PROJECT_DIR$/platform/boot" />
+                  <project path="$PROJECT_DIR$/platform/gradle-plugin" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/mclib2-test" />
+        <option name="gradleHome" value="" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/core/annotation-system" />
+            <option value="$PROJECT_DIR$/core/annotation-system/api" />
+            <option value="$PROJECT_DIR$/core/annotation-system/processor" />
+            <option value="$PROJECT_DIR$/core/runtime" />
+            <option value="$PROJECT_DIR$/mclib2-test" />
+            <option value="$PROJECT_DIR$/platform" />
+            <option value="$PROJECT_DIR$/platform/boot" />
+            <option value="$PROJECT_DIR$/platform/gradle-plugin" />
           </set>
         </option>
       </GradleProjectSettings>

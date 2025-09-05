@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+    id 'mclib2-plugin'
+}
+
+group = 'be.theking90000.mclib2'
+version = '0.0.1'
+
+repositories {
+    mavenCentral()
+}
+
+mclib2 {
+    version = "project"
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}

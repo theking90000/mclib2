@@ -1,0 +1,3 @@
+rootProject.name = 'mclib2-test'
+
+includeBuild("..")

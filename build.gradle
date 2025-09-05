@@ -24,6 +24,13 @@ subprojects {
         withJavadocJar()
     }
 
+    tasks.withType(Jar).configureEach {
+        // Use the same logic as for artifactId
+        archiveBaseName.set(
+                project.path.replace(":", "-").replaceFirst("-", "")
+        )
+    }
+
     if (file("$projectDir/build.gradle").exists()) {
         publishing {
             publications {
