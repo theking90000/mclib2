@@ -9,13 +9,15 @@ import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.*;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public abstract class GeneratePluginDescriptor extends DefaultTask {
 
@@ -39,7 +41,7 @@ public abstract class GeneratePluginDescriptor extends DefaultTask {
 
     @TaskAction
     public void generate() throws Exception {
-        PluginDescriptor descriptor = new PluginDescriptor(/* loadImmediately*/ false, new HashSet<>(), getDependencies());
+        PluginDescriptor descriptor = new PluginDescriptor(/* loadImmediately*/ false, getEntrypoints(), getDependencies());
 
         File file = getOutputFile().get().getAsFile();
         file.getParentFile().mkdirs();
@@ -89,6 +91,11 @@ public abstract class GeneratePluginDescriptor extends DefaultTask {
                                 null
                         ));
             }
+
+            dependencies.add(new PluginDescriptor.Dependency(
+                    null, getProject().getGroup().toString() + ":" + getProject().getName().toString() + ":" + getProject().getVersion().toString(),
+                    null, null
+            ));
         }
 
         if (!isDev()) {
@@ -103,6 +110,38 @@ public abstract class GeneratePluginDescriptor extends DefaultTask {
         return dependencies;
     }
 
+    private Set<String> getEntrypoints() {
+        HashSet<String> entrypoints = new HashSet<>();
+        for (File file : getRuntimeClasspath().getFiles()) {
+            if (file.getName().endsWith(".jar")) {
+                try (JarFile jf = new JarFile(file)) {
+                    JarEntry je = jf.getJarEntry("entrypoints.txt");
+                    if (je != null) {
+                        readEntrypoints(jf.getInputStream(je), entrypoints);
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to read entrypoints from jar: " + file, e);
+                }
+            } else {
+                File f = new File(file, "entrypoints.txt");
+                if (f.exists()) {
+                    try (InputStream in = Files.newInputStream(f.toPath())) {
+                        readEntrypoints(in, entrypoints);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to read entrypoints from file: " + f, e);
+                    }
+                }
+            }
+        }
+        return entrypoints;
+    }
+
+    private void readEntrypoints(InputStream in, Set<String> entrypoints) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        while (reader.ready()) {
+            entrypoints.add(reader.readLine());
+        }
+    }
 
     private static String sha256(File file) throws Exception {
         try (InputStream in = Files.newInputStream(file.toPath())) {

@@ -1,0 +1,1 @@
+be.theking90000.mclib2.test.TestEntrypoint

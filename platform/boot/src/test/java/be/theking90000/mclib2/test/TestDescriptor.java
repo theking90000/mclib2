@@ -25,7 +25,8 @@ public class TestDescriptor {
     }
 
     private void addSelf(Set<PluginDescriptor.Dependency> deps) throws Exception {
-        String[] p = System.getProperty("java.class.path").split(";");
+        String pp = System.getProperty("java.class.path");
+        String[] p = pp.split(pp.contains(";")? ";":":");
         for (String s : p) {
             if (s.contains("classes/java/test") || s.contains("classes\\java\\test")) {
                 deps.add(new PluginDescriptor.Dependency(s, "be.theking90000.mclib2:platform-boot-test:0.0.1", null, null));

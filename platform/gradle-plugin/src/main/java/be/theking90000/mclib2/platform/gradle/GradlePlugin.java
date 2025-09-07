@@ -60,7 +60,7 @@ public class GradlePlugin implements Plugin<Project> {
 
         TaskProvider<Jar> codeJar = target.getTasks().register("codeJar", Jar.class, jar -> {
             jar.setGroup("mclib2");
-            jar.getArchiveBaseName().set("code");
+            jar.getArchiveBaseName().set(target.getGroup()+"-"+target.getName());
             SourceSetContainer sourceSets = target.getExtensions().getByType(SourceSetContainer.class);
             jar.from(sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).getOutput());
         });
@@ -72,6 +72,11 @@ public class GradlePlugin implements Plugin<Project> {
                     task.dependsOn(codeJar);
 
                     task.getCodeFile().set(codeJar.flatMap(Jar::getArchiveFile));
+
+                    SourceSetContainer sourceSets = target.getExtensions().getByType(SourceSetContainer.class);
+                    SourceSet sourceSetOutput = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+
+                    task.getRuntimeClasspath().setFrom(sourceSetOutput.getRuntimeClasspath());
 
                     task.getConfiguration().set(runtime.getName());
                     task.getOutputFile().set(target.getLayout().getBuildDirectory().file("generated/plugin-descriptor.dat"));
