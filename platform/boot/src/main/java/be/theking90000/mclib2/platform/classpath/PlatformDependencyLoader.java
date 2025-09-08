@@ -73,7 +73,7 @@ public class PlatformDependencyLoader {
                     InputStream in = requestedBy.getResourceAsStream("libs/" + fileName);
                     if (in != null) {
                         path = Paths.get(CACHE_DIR, fileName);
-                        Files.copy(in, path);
+                        Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
                     }
 
                     break;
