@@ -350,23 +350,26 @@ public class NestedURLClassLoader extends URLClassLoader implements ClasspathApp
    @Override
    public URL findResource(String name) {
       URL foundResource = findLocalResource(name);
+      if(foundResource == null) {
+         foundResource = super.findResource(name);
+      }
       return foundResource;
    }
 
    @Override
-   public Enumeration<URL> findResources(String name) {
-      Set<URL> combinedResources = null;
-      Set<URL> foundResources = findLocalResources(name);
-      if (foundResources.size() > 0) {
-         if (combinedResources == null) {
-            combinedResources = new LinkedHashSet<>();
-         }
-         combinedResources.addAll(foundResources);
-      }
-      if (combinedResources != null) {
-         return Collections.enumeration(combinedResources);
-      }
-      return Collections.emptyEnumeration();
+   public Enumeration<URL> findResources(String name) throws IOException {
+      Set<URL> combinedResources = new LinkedHashSet<>();
+       Set<URL> localResources = findLocalResources(name);
+
+       if(localResources != null) {
+           combinedResources.addAll(localResources);
+       }
+       Enumeration<URL> resources = super.findResources(name);
+       while (resources.hasMoreElements()) {
+              combinedResources.add(resources.nextElement());
+       }
+
+        return Collections.enumeration(combinedResources);
    }
 
    private Class<?> findLocalClassImpl(String className, boolean resolve) throws ClassNotFoundException {

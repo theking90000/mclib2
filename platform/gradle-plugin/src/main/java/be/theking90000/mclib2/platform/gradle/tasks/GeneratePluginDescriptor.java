@@ -82,7 +82,7 @@ public abstract class GeneratePluginDescriptor extends DefaultTask {
                     .getResolvedArtifacts()) {
                 ModuleVersionIdentifier id = artifact.getModuleVersion().getId();
                 String coordinates = id.getGroup()+":"+id.getName();
-                String sha256 = sha256(artifact.getFile());
+                //String sha256 = sha256(artifact.getFile());
                 String fileName = "libs/" + coordinates.replace(":",".")+"-"+id.getVersion()+".jar";
 
                 dependencies.add(
@@ -90,7 +90,7 @@ public abstract class GeneratePluginDescriptor extends DefaultTask {
                                 coordinates,
                                 id.getVersion(),
                                 fileName
-                        ).cached(sha256)
+                        )/*.cached(sha256)*/
                 );
 
 
