@@ -4,8 +4,10 @@ import be.theking90000.mclib2.platform.gradle.tasks.GeneratePluginDescriptor;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.ResolvableConfiguration;
 import org.gradle.api.artifacts.ResolvedConfiguration;
+import org.gradle.api.file.RegularFile;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
@@ -116,7 +118,7 @@ public class GradlePlugin implements Plugin<Project> {
 
             jar.from(target.provider(() ->
                     bootstrapStandalone.resolve().stream()
-                            .map(dep -> target.zipTree(dep))
+                            .map(target::zipTree)
                             .collect(Collectors.toList())
             ));
 
@@ -137,6 +139,24 @@ public class GradlePlugin implements Plugin<Project> {
                     throw new RuntimeException("Failed to read manifest from dependency: " + depJar, e);
                 }
             });
+
+            jar.from(target.provider(() ->
+                    runtime.getResolvedConfiguration()
+                            .getResolvedArtifacts().stream()
+                            .map(a ->  a.getFile().toPath()
+                            ).collect(Collectors.toList())
+            ), copy -> copy.rename((f) -> {
+                        ModuleVersionIdentifier id = runtime.getResolvedConfiguration()
+                                .getResolvedArtifacts().stream()
+                                .filter(a -> a.getFile().getName().equals(f))
+                                .findFirst()
+                                .map(a -> a.getModuleVersion().getId())
+                                .orElse(null);
+
+                String coordinates = id.getGroup() + ":" + id.getName();
+                return coordinates.replace(":",".")+"-"+id.getVersion()+".jar";
+
+                    }).into("libs"));
 
 
         });

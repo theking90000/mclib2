@@ -2,6 +2,7 @@ package be.theking90000.mclib2.platform.classpath;
 
 
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Path;
 
 /**
@@ -12,8 +13,7 @@ public interface ClasspathAppender {
     /**
      * Appends the given path to the classpath.
      *
-     * @param path the path
-     * @throws MalformedURLException in case the path needs to be turned into a URL, this can be thrown
+     * @param url the url to append
      */
-    void appendFileToClasspath(Path path) throws MalformedURLException;
+    void appendUrlToClasspath(URL url);
 }

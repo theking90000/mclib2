@@ -1,6 +1,7 @@
 package be.theking90000.mclib2.platform;
 
 import be.theking90000.mclib2.platform.classpath.ChildFirstClassLoader;
+import be.theking90000.mclib2.platform.classpath.ClasspathEntry;
 
 import java.util.Objects;
 import java.util.Set;
@@ -26,7 +27,7 @@ public class RegisteredPlugin<T> {
         this.callerClassLoader = callerClassLoader;
     }
 
-    public Set<PluginDescriptor.Dependency> getDependencies() {
+    public Set<ClasspathEntry> getDependencies() {
         return descriptor.dependencies;
     }
 

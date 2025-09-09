@@ -1,9 +1,12 @@
 package be.theking90000.mclib2.platform.gradle.tasks;
 
 import be.theking90000.mclib2.platform.PluginDescriptor;
+import be.theking90000.mclib2.platform.classpath.ClasspathEntry;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.artifacts.ResolvedModuleVersion;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
@@ -58,53 +61,49 @@ public abstract class GeneratePluginDescriptor extends DefaultTask {
         return getDevMode().getOrElse(false);
     }
 
-    private Set<PluginDescriptor.Dependency> getDependencies() throws Exception {
-        Set<PluginDescriptor.Dependency> dependencies = new HashSet<>();
+    private Set<ClasspathEntry> getDependencies() throws Exception {
+        Set<ClasspathEntry> dependencies = new HashSet<>();
 
         if (isDev()) {
             for (File file : getRuntimeClasspath().getFiles()) {
                 dependencies.add(
-                        new PluginDescriptor.Dependency(
-                                file.getAbsolutePath(),
-                                "dev:" + file.getAbsolutePath()
+                        ClasspathEntry.file(
+                                file.getAbsolutePath()
                                         .replace("/", "-")
                                         .replace("\\", "-")
-                                        .replace(":", "-") + ":0",
-                                null,
-                                null
+                                        .replace(":", "-"),
+                                "",
+                                file.toPath()
                         ));
             }
         } else {
             for (ResolvedArtifact artifact : configuration()
                     .getResolvedConfiguration()
                     .getResolvedArtifacts()) {
-                String coordinates = artifact.getModuleVersion().getId().toString();
-                File jarFile = artifact.getFile();
-                String sha256 = sha256(jarFile);
-
+                ModuleVersionIdentifier id = artifact.getModuleVersion().getId();
+                String coordinates = id.getGroup()+":"+id.getName();
+                String sha256 = sha256(artifact.getFile());
+                String fileName = "libs/" + coordinates.replace(":",".")+"-"+id.getVersion()+".jar";
 
                 dependencies.add(
-                        new PluginDescriptor.Dependency(
-                                null,
+                        ClasspathEntry.embedded(
                                 coordinates,
-                                sha256,
-                                null
-                        ));
-            }
+                                id.getVersion(),
+                                fileName
+                        ).cached(sha256)
+                );
 
-            dependencies.add(new PluginDescriptor.Dependency(
-                    null, getProject().getGroup().toString() + ":" + getProject().getName().toString() + ":" + getProject().getVersion().toString(),
-                    null, null
-            ));
+
+            }
         }
 
         if (!isDev()) {
-            dependencies.add(new PluginDescriptor.Dependency(
-                    null, getProject().getGroup() + ":" +
-                    getProject().getName() + ":" +
-                    getProject().getVersion(),
-                    sha256(getCodeFile().get().getAsFile()),
-                    null));
+           String fileName = getProject().getGroup()+"-"+getProject().getName()+"-"+getProject().getVersion()+".jar";
+           dependencies.add(ClasspathEntry.embedded(
+                    getProject().getGroup() + ":" + getProject().getName(),
+                    getProject().getVersion().toString(),
+                    "libs/"+    fileName)
+                   );
         }
 
         return dependencies;

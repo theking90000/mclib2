@@ -5,7 +5,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 
-public class ChildFirstClassLoader extends URLClassLoader implements ClasspathAppender {
+public class ChildFirstClassLoader extends NestedURLClassLoader /*URLClassLoader*/ implements ClasspathAppender {
 
     static {
         ClassLoader.registerAsParallelCapable();
@@ -15,19 +15,19 @@ public class ChildFirstClassLoader extends URLClassLoader implements ClasspathAp
         super(new URL[0], parent);
     }
 
-    @Override
-    public void appendFileToClasspath(Path path) throws MalformedURLException {
-        addURL(path.toUri().toURL());
+    public void appendUrlToClasspath(URL url) {
+        addURL(url);
     }
 
     @Override
-    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        synchronized (getClassLoadingLock(name)) {
+    public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        return super.loadClass(name, resolve);
+       /* synchronized (getClassLoadingLock(name)) {
             // First, check if the class has already been loaded
             Class<?> loadedClass = findLoadedClass(name);
             if (loadedClass == null) {
                 try {
-                    loadedClass = findClass(name);
+                    loadedClass = super.findClass(name);
                 } catch (ClassNotFoundException e) {
                     // class is not found in the given urls.
                     // Let's try it in parent classloader.
@@ -40,7 +40,7 @@ public class ChildFirstClassLoader extends URLClassLoader implements ClasspathAp
                 resolveClass(loadedClass);
             }
             return loadedClass;
-        }
+        }*/
     }
 
 

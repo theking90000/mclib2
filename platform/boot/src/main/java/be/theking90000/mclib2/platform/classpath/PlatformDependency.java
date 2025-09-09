@@ -6,12 +6,12 @@ import java.util.Objects;
 
 public class PlatformDependency {
 
-    private PluginDescriptor.Dependency descriptor;
+    private ClasspathEntry entry;
     private ClassLoader requestedBy;
-    private PlatformDependencyLoader loader = null;
+    private boolean loaded = false;
 
-    public PlatformDependency(PluginDescriptor.Dependency descriptor, ClassLoader requestedBy) {
-        this.descriptor = descriptor;
+    public PlatformDependency(ClasspathEntry entry, ClassLoader requestedBy) {
+        this.entry = entry;
         this.requestedBy = requestedBy;
     }
 
@@ -23,33 +23,30 @@ public class PlatformDependency {
      */
     public boolean load(ClasspathAppender classpath) {
         try {
-            return getLoader().load(classpath);
+            classpath.appendUrlToClasspath(entry.resolve(requestedBy));
+            if (!loaded) {
+                loaded = true;
+                return false;
+            }
+            return true;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load dependency: " + descriptor, e);
+            throw new RuntimeException("Failed to load dependency: " + entry, e);
         }
     }
 
-    private PlatformDependencyLoader getLoader() {
-        if (loader == null) {
-            loader = new PlatformDependencyLoader(descriptor, requestedBy);
-        }
-        return loader;
+    public ClasspathEntry getClasspathEntry() {
+        return entry;
     }
-
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         PlatformDependency that = (PlatformDependency) o;
-        return Objects.equals(descriptor, that.descriptor);
+        return Objects.equals(entry, that.entry);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(descriptor);
-    }
-
-    public PluginDescriptor.Dependency getDescriptor() {
-        return descriptor;
+        return Objects.hashCode(entry);
     }
 }

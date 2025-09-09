@@ -9,12 +9,12 @@ public class PlatformClasspath {
 
     private final ChildFirstClassLoader platformClassLoader;
 
-    private final Set<String> globalCoordinatesLoaded = new HashSet<>();
+    private final Set<String> globalIdsLoaded = new HashSet<>();
     private final Set<PlatformDependency> globalDependencies = new HashSet<>();
     private final Map<RegisteredPlugin<?>, Set<PlatformDependency>> localDependencies = new HashMap<>();
 
-    private final Map<PluginDescriptor.Dependency, Integer> awaitingDependencies = new HashMap<>();
-    private final Map<PluginDescriptor.Dependency, PlatformDependency> platformDependencies = new HashMap<>();
+    private final Map<ClasspathEntry, Integer> awaitingDependencies = new HashMap<>();
+    private final Map<ClasspathEntry, PlatformDependency> platformDependencies = new HashMap<>();
 
     public PlatformClasspath() {
         platformClassLoader = new ChildFirstClassLoader(getClass().getClassLoader());
@@ -32,7 +32,7 @@ public class PlatformClasspath {
      * @param registeredPlugin the plugin whose dependencies to register
      */
     public void registerDependencies(RegisteredPlugin<?> registeredPlugin) {
-        for (PluginDescriptor.Dependency dependency : registeredPlugin.getDependencies()) {
+        for (ClasspathEntry dependency : registeredPlugin.getDependencies()) {
             platformDependencies.computeIfAbsent(dependency, (k) -> new PlatformDependency(dependency, registeredPlugin.callerClassLoader));
             awaitingDependencies.compute(dependency, (k, v) -> v == null ? 1 : v + 1);
         }
@@ -47,7 +47,7 @@ public class PlatformClasspath {
     public int loadPluginDependencies(RegisteredPlugin<?> registeredPlugin) {
         int loaded = this.processAwaitingDependencies();
 
-        for (PluginDescriptor.Dependency dependency : registeredPlugin.getDependencies()) {
+        for (ClasspathEntry dependency : registeredPlugin.getDependencies()) {
             if (loadDependency(dependency, registeredPlugin)) loaded++;
         }
 
@@ -57,7 +57,7 @@ public class PlatformClasspath {
     public void unregisterDependencies(RegisteredPlugin<?> registeredPlugin) {
         localDependencies.remove(registeredPlugin);
 
-        for (PluginDescriptor.Dependency dep : registeredPlugin.getDependencies()) {
+        for (ClasspathEntry dep : registeredPlugin.getDependencies()) {
             // Decrease the count of awaiting dependencies
             awaitingDependencies.computeIfPresent(dep, (k, v) -> v > 1 ? v - 1 : null);
         }
@@ -73,7 +73,7 @@ public class PlatformClasspath {
     }
 
     public void shutdown() {
-        globalCoordinatesLoaded.clear();
+        globalIdsLoaded.clear();
 
         for (RegisteredPlugin<?> r : localDependencies.keySet()) {
             try {
@@ -104,7 +104,7 @@ public class PlatformClasspath {
      * @param plugin     the plugin requesting the dependency
      * @return true if the dependency was added to the classpath, false if was already loaded
      */
-    private boolean loadDependency(PluginDescriptor.Dependency dependency, RegisteredPlugin<?> plugin) {
+    private boolean loadDependency(ClasspathEntry dependency, RegisteredPlugin<?> plugin) {
         PlatformDependency pDep = platformDependencies.get(dependency);
 
         if (pDep == null) throw new RuntimeException("Dependency not registered: " + dependency);
@@ -113,10 +113,10 @@ public class PlatformClasspath {
         // Is accessible from "platformClassLoader"
         if (globalDependencies.contains(pDep)) return false;
 
-        // Check if we have a dependency conflict (same maven coordinates but different sha256 or version)
+        // Check if we have a dependency conflict (same global identifier but different unique ID)
         // If this is the case, the dependency cannot be loaded as a global dependency.
         // and must be loaded as a local dependency.
-        if (globalCoordinatesLoaded.contains(dependency.coordinatesWithoutVersion())) {
+        if (globalIdsLoaded.contains(dependency.getGlobalID())) {
             Set<PlatformDependency> localDeps = localDependencies.computeIfAbsent(plugin, (k) -> new HashSet<>());
             if (localDeps.contains(pDep)) return false;
 
@@ -128,7 +128,7 @@ public class PlatformClasspath {
         // Load as a global dependency
         pDep.load(platformClassLoader);
         globalDependencies.add(pDep);
-        globalCoordinatesLoaded.add(dependency.coordinatesWithoutVersion());
+        globalIdsLoaded.add(dependency.getGlobalID());
         return true;
     }
 
@@ -137,21 +137,21 @@ public class PlatformClasspath {
 
         int loaded = 0;
 
-        List<Map.Entry<PluginDescriptor.Dependency, Integer>> sorted =
+        List<Map.Entry<ClasspathEntry, Integer>> sorted =
                 new ArrayList<>(awaitingDependencies.entrySet());
         sorted.sort((a, b) -> b.getValue().compareTo(a.getValue()));
 
-        for (Map.Entry<PluginDescriptor.Dependency, Integer> entry : sorted) {
-            PluginDescriptor.Dependency dependency = entry.getKey();
+        for (Map.Entry<ClasspathEntry, Integer> entry : sorted) {
+            ClasspathEntry dependency = entry.getKey();
             PlatformDependency pDep = platformDependencies.get(dependency);
 
             if (pDep == null) throw new RuntimeException("Dependency not registered: " + dependency);
 
             // Attempt to load the dependency as a global dependency
-            if (!globalDependencies.contains(pDep) && !globalCoordinatesLoaded.contains(dependency.coordinatesWithoutVersion())) {
+            if (!globalDependencies.contains(pDep) && !globalIdsLoaded.contains(dependency.getGlobalID())) {
                 pDep.load(platformClassLoader);
                 globalDependencies.add(pDep);
-                globalCoordinatesLoaded.add(dependency.coordinatesWithoutVersion());
+                globalIdsLoaded.add(dependency.getGlobalID());
                 loaded++;
             }
 

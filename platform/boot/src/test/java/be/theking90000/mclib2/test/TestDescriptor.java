@@ -1,10 +1,13 @@
 package be.theking90000.mclib2.test;
 
 import be.theking90000.mclib2.platform.PluginDescriptor;
+import be.theking90000.mclib2.platform.classpath.ClasspathEntry;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,18 +27,19 @@ public class TestDescriptor {
         entries.add(a);
     }
 
-    private void addSelf(Set<PluginDescriptor.Dependency> deps) throws Exception {
+    private void addSelf(Set<ClasspathEntry> deps) throws Exception {
         String pp = System.getProperty("java.class.path");
         String[] p = pp.split(pp.contains(";")? ";":":");
         for (String s : p) {
             if (s.contains("classes/java/test") || s.contains("classes\\java\\test")) {
-                deps.add(new PluginDescriptor.Dependency(s, "be.theking90000.mclib2:platform-boot-test:0.0.1", null, null));
+                deps.add(ClasspathEntry.url("code", "0", new URL("file://" + s +"/")));
             }
         }
     }
 
-    private void addDependencies(Set<PluginDescriptor.Dependency> deps) {
-        deps.add(new PluginDescriptor.Dependency(null, "org.slf4j:slf4j-api:2.0.17", "7b751d952061954d5abfed7181c1f645d336091b679891591d63329c622eb832", "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar"));
+    private void addDependencies(Set<ClasspathEntry> deps) throws IOException {
+        deps.add(ClasspathEntry.url("org.slf4j:slf4j-api", "2.0.17", new URL("https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar")));
+        //   deps.add(new PluginDescriptor.Dependency(null, "org.slf4j:slf4j-api:2.0.17", "7b751d952061954d5abfed7181c1f645d336091b679891591d63329c622eb832", "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar"));
     }
 
     @Test
