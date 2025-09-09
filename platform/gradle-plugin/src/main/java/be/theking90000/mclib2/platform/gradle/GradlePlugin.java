@@ -102,6 +102,32 @@ public class GradlePlugin implements Plugin<Project> {
                 });
 
         // Standalone entrypoint : TODO
+        TaskProvider<Jar> platformJar = target.getTasks().register("platformJar", Jar.class, jar -> {
+            jar.setGroup("mclib2");
+
+            jar.getArchiveBaseName().set(target.getName());
+
+            jar.from(codeJar, copy -> copy.into("libs"));
+            jar.from(descriptor, copy -> copy.into(".").rename(f -> "plugin-descriptor.dat"));
+
+            jar.from(target.provider(() ->
+                    runtime.getResolvedConfiguration()
+                            .getResolvedArtifacts().stream()
+                            .map(a ->  a.getFile().toPath())
+                            .collect(Collectors.toList())
+            ), copy -> copy.rename((f) -> {
+                ModuleVersionIdentifier id = runtime.getResolvedConfiguration()
+                        .getResolvedArtifacts().stream()
+                        .filter(a -> a.getFile().getName().equals(f))
+                        .findFirst()
+                        .map(a -> a.getModuleVersion().getId())
+                        .orElse(null);
+
+                String coordinates = id.getGroup() + ":" + id.getName();
+                return coordinates.replace(":",".")+"-"+id.getVersion()+".jar";
+
+            }).into("libs"));
+        });
 
         TaskProvider<Jar> standaloneJar = target.getTasks().register("standaloneJar", Jar.class, jar -> {
             jar.setGroup("mclib2");
@@ -113,8 +139,7 @@ public class GradlePlugin implements Plugin<Project> {
 
             jar.dependsOn(bootstrapStandalone);
 
-            jar.from(codeJar, copy -> copy.into("libs"));
-            jar.from(descriptor, copy -> copy.into(".").rename(f -> "plugin-descriptor.dat"));
+            jar.from(target.provider(() -> target.zipTree(platformJar.get().getArchiveFile().get().getAsFile())), copy->copy.into("."));
 
             jar.from(target.provider(() ->
                     bootstrapStandalone.resolve().stream()
@@ -140,23 +165,7 @@ public class GradlePlugin implements Plugin<Project> {
                 }
             });
 
-            jar.from(target.provider(() ->
-                    runtime.getResolvedConfiguration()
-                            .getResolvedArtifacts().stream()
-                            .map(a ->  a.getFile().toPath()
-                            ).collect(Collectors.toList())
-            ), copy -> copy.rename((f) -> {
-                        ModuleVersionIdentifier id = runtime.getResolvedConfiguration()
-                                .getResolvedArtifacts().stream()
-                                .filter(a -> a.getFile().getName().equals(f))
-                                .findFirst()
-                                .map(a -> a.getModuleVersion().getId())
-                                .orElse(null);
 
-                String coordinates = id.getGroup() + ":" + id.getName();
-                return coordinates.replace(":",".")+"-"+id.getVersion()+".jar";
-
-                    }).into("libs"));
 
 
         });
