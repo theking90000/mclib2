@@ -1,11 +1,7 @@
 package be.theking90000.mclib2.test;
 
-
 import be.theking90000.mclib2.platform.PlatformEntrypoint;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.logging.Logger;
 
 public class TestEntrypoint {
