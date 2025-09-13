@@ -1,10 +1,12 @@
 package be.theking90000.mclib2.platform.gradle;
 
 import be.theking90000.mclib2.platform.gradle.tasks.GeneratePluginDescriptor;
+import be.theking90000.mclib2.platform.gradle.tasks.PluginYaml;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
+import org.gradle.api.file.DuplicatesStrategy;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
@@ -129,6 +131,8 @@ public class GradlePlugin implements Plugin<Project> {
         TaskProvider<Jar> standaloneJar = target.getTasks().register("standaloneJar", Jar.class, jar -> {
             jar.setGroup("mclib2");
 
+            jar.dependsOn(platformJar);
+
             jar.getArchiveBaseName().set(target.getName() + "-standalone");
 
             Configuration bootstrapStandalone = createConfiguration(target, "MCLib2BootstrapStandalone");
@@ -167,50 +171,53 @@ public class GradlePlugin implements Plugin<Project> {
             });
         });
 
+        Configuration bootstrapBukkit = createConfiguration(target, "MCLib2BootstrapBukkit");
+
+        target.afterEvaluate((p) -> {
+            bootstrapBukkit.getDependencies().add(dRes.resolve("be.theking90000.mclib2:platform-bukkit-adapter", "be.theking90000.mclib2:bukkit-adapter"));
+        });
+
+        TaskProvider<PluginYaml> pluginYaml = target.getTasks()
+                .register("pluginYaml", PluginYaml.class, task -> {
+                    task.setGroup("mclib2");
+
+                    task.dependsOn(codeJar);
+                    task.dependsOn(bootstrapBukkit);
+
+                    SourceSetContainer sourceSets = target.getExtensions().getByType(SourceSetContainer.class);
+                    SourceSet sourceSetOutput = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+
+                    task.getClasspath().setFrom(sourceSetOutput.getRuntimeClasspath().plus(
+                            bootstrapBukkit
+                    ));
+
+                    task.getOutputFile().set(target.getLayout().getBuildDirectory().file("generated/plugin.yml"));
+                });
 
         TaskProvider<Jar> bukkitJar = target.getTasks().register("bukkitJar", Jar.class, jar -> {
             jar.setGroup("mclib2");
 
+            jar.dependsOn(platformJar);
+            jar.dependsOn(pluginYaml);
+
             jar.getArchiveBaseName().set(target.getName() + "-bukkit");
 
-            Configuration bootstrapBukkit = createConfiguration(target, "MCLib2BootstrapBukkit");
-            bootstrapBukkit.getDependencies().add(dRes.resolve("be.theking90000.mclib2:platform-bukkit-adapter", "be.theking90000.mclib2:bukkit-adapter"));
 
             jar.dependsOn(bootstrapBukkit);
 
-            jar.from(target.provider(() -> target.zipTree(platformJar.get().getArchiveFile().get().getAsFile())), copy -> copy.into("."));
+            jar.from(target.provider(() -> target.zipTree(platformJar.get().getArchiveFile().get().getAsFile())),
+                    copy -> copy.into(".").exclude("plugin.yml"));
+
+            jar.from(pluginYaml, copy->copy.into("."));
 
             jar.from(target.provider(() ->
                     bootstrapBukkit.resolve().stream()
                             .map(target::zipTree)
                             .collect(Collectors.toList())
-            ));
+            ), cp->cp.exclude("plugin.yml"));
 
             platformJar.get().getArchiveFile();
 
-            jar.doFirst(task -> {
-                Map<Object, Object> map = new HashMap<>();
-                try {
-                    for (File f : bootstrapBukkit.resolve()) {
-                        Map<Object, Object> n = pluginFile(f);
-                        if (n != null) {
-                            map.putAll(n);
-                        }
-                    }
-                    File generated = new File(jar.getTemporaryDir(), "plugin.yml");
-                    try (Writer w = new FileWriter(generated)) {
-                        new Yaml().dump(map, w);
-                    } catch (IOException e) {
-                        throw new RuntimeException("Failed to write merged plugin.yml", e);
-                    }
-
-                    // Put merged file at root of jar
-                    jar.from(generated, spec -> spec.into(""));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new RuntimeException("Failed to read manifest from dependency", e);
-                }
-            });
         });
     }
 
@@ -224,21 +231,6 @@ public class GradlePlugin implements Plugin<Project> {
         configuration.setCanBeResolved(true);
         configuration.setVisible(false);
         return configuration;
-    }
-
-    private Map<Object, Object> pluginFile(File file) {
-        try (JarFile jf = new JarFile(file)) {
-            java.util.jar.JarEntry entry = jf.getJarEntry("plugin.yml");
-            if (entry != null) {
-                Yaml yaml = new Yaml();
-                try (InputStream in = jf.getInputStream(entry)) {
-                    return yaml.load(in);
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to read manifest from dependency: " + file, e);
-        }
-        return null;
     }
 
 }
