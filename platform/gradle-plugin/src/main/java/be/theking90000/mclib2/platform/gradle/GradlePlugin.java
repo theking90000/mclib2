@@ -150,12 +150,13 @@ public class GradlePlugin implements Plugin<Project> {
 
             jar.doFirst(task -> {
                 try {
+                    jar.getManifest().getAttributes().clear();
                     for (File depJar : bootstrapStandalone.resolve()) {
                         try (JarFile jf = new JarFile(depJar)) {
                             Manifest depManifest = jf.getManifest();
                             if (depManifest != null) {
                                 // Clear Gradle’s default manifest
-                                jar.getManifest().getAttributes().clear();
+
 
                                 // Copy all attributes from dependency manifest
                                 depManifest.getMainAttributes().forEach((key, value) -> {

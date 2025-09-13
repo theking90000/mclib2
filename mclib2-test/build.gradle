@@ -8,6 +8,10 @@ version = '0.0.1'
 
 repositories {
     mavenCentral()
+    maven {
+        name = "spigot"
+        url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+    }
 }
 
 mclib2 {
@@ -15,6 +19,8 @@ mclib2 {
 }
 
 dependencies {
+    compileOnly 'org.bukkit:bukkit:1.8.8-R0.1-SNAPSHOT'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
