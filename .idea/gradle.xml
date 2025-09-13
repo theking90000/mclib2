@@ -16,6 +16,7 @@
             <option value="$PROJECT_DIR$/core/runtime" />
             <option value="$PROJECT_DIR$/platform" />
             <option value="$PROJECT_DIR$/platform/boot" />
+            <option value="$PROJECT_DIR$/platform/bukkit-adapter" />
             <option value="$PROJECT_DIR$/platform/gradle-plugin" />
             <option value="$PROJECT_DIR$/platform/standalone-adapter" />
           </set>
@@ -35,6 +36,7 @@
                   <project path="$PROJECT_DIR$/core/runtime" />
                   <project path="$PROJECT_DIR$/platform" />
                   <project path="$PROJECT_DIR$/platform/boot" />
+                  <project path="$PROJECT_DIR$/platform/bukkit-adapter" />
                   <project path="$PROJECT_DIR$/platform/gradle-plugin" />
                   <project path="$PROJECT_DIR$/platform/standalone-adapter" />
                 </projects>
@@ -55,6 +57,7 @@
             <option value="$PROJECT_DIR$/mclib2-test" />
             <option value="$PROJECT_DIR$/platform" />
             <option value="$PROJECT_DIR$/platform/boot" />
+            <option value="$PROJECT_DIR$/platform/bukkit-adapter" />
             <option value="$PROJECT_DIR$/platform/gradle-plugin" />
             <option value="$PROJECT_DIR$/platform/standalone-adapter" />
           </set>

@@ -5,19 +5,16 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
-import org.gradle.api.artifacts.ResolvableConfiguration;
-import org.gradle.api.artifacts.ResolvedConfiguration;
-import org.gradle.api.file.RegularFile;
-import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.api.tasks.SourceSetOutput;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.jvm.tasks.Jar;
 import org.jetbrains.annotations.NotNull;
+import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -62,7 +59,7 @@ public class GradlePlugin implements Plugin<Project> {
 
         TaskProvider<Jar> codeJar = target.getTasks().register("codeJar", Jar.class, jar -> {
             jar.setGroup("mclib2");
-            jar.getArchiveBaseName().set(target.getGroup()+"-"+target.getName());
+            jar.getArchiveBaseName().set(target.getGroup() + "-" + target.getName());
             SourceSetContainer sourceSets = target.getExtensions().getByType(SourceSetContainer.class);
             jar.from(sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).getOutput());
         });
@@ -113,7 +110,7 @@ public class GradlePlugin implements Plugin<Project> {
             jar.from(target.provider(() ->
                     runtime.getResolvedConfiguration()
                             .getResolvedArtifacts().stream()
-                            .map(a ->  a.getFile().toPath())
+                            .map(a -> a.getFile().toPath())
                             .collect(Collectors.toList())
             ), copy -> copy.rename((f) -> {
                 ModuleVersionIdentifier id = runtime.getResolvedConfiguration()
@@ -124,7 +121,7 @@ public class GradlePlugin implements Plugin<Project> {
                         .orElse(null);
 
                 String coordinates = id.getGroup() + ":" + id.getName();
-                return coordinates.replace(":",".")+"-"+id.getVersion()+".jar";
+                return coordinates.replace(":", ".") + "-" + id.getVersion() + ".jar";
 
             }).into("libs"));
         });
@@ -139,7 +136,7 @@ public class GradlePlugin implements Plugin<Project> {
 
             jar.dependsOn(bootstrapStandalone);
 
-            jar.from(target.provider(() -> target.zipTree(platformJar.get().getArchiveFile().get().getAsFile())), copy->copy.into("."));
+            jar.from(target.provider(() -> target.zipTree(platformJar.get().getArchiveFile().get().getAsFile())), copy -> copy.into("."));
 
             jar.from(target.provider(() ->
                     bootstrapStandalone.resolve().stream()
@@ -148,26 +145,72 @@ public class GradlePlugin implements Plugin<Project> {
             ));
 
             jar.doFirst(task -> {
-                File depJar = bootstrapStandalone.resolve().iterator().next();
-                try (JarFile jf = new JarFile(depJar)) {
-                    Manifest depManifest = jf.getManifest();
-                    if (depManifest != null) {
-                        // Clear Gradle’s default manifest
-                        jar.getManifest().getAttributes().clear();
+                try {
+                    for (File depJar : bootstrapStandalone.resolve()) {
+                        try (JarFile jf = new JarFile(depJar)) {
+                            Manifest depManifest = jf.getManifest();
+                            if (depManifest != null) {
+                                // Clear Gradle’s default manifest
+                                jar.getManifest().getAttributes().clear();
 
-                        // Copy all attributes from dependency manifest
-                        depManifest.getMainAttributes().forEach((key, value) -> {
-                            jar.getManifest().getAttributes().put(key.toString(), value);
-                        });
+                                // Copy all attributes from dependency manifest
+                                depManifest.getMainAttributes().forEach((key, value) -> {
+                                    jar.getManifest().getAttributes().put(key.toString(), value);
+                                });
+                            }
+                        }
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException("Failed to read manifest from dependency: " + depJar, e);
+                    throw new RuntimeException("Failed to read manifest from dependency", e);
+                }
+
+            });
+        });
+
+
+        TaskProvider<Jar> bukkitJar = target.getTasks().register("bukkitJar", Jar.class, jar -> {
+            jar.setGroup("mclib2");
+
+            jar.getArchiveBaseName().set(target.getName() + "-bukkit");
+
+            Configuration bootstrapBukkit = createConfiguration(target, "MCLib2BootstrapBukkit");
+            bootstrapBukkit.getDependencies().add(dRes.resolve("be.theking90000.mclib2:platform-bukkit-adapter", "be.theking90000.mclib2:bukkit-adapter"));
+
+            jar.dependsOn(bootstrapBukkit);
+
+            jar.from(target.provider(() -> target.zipTree(platformJar.get().getArchiveFile().get().getAsFile())), copy -> copy.into("."));
+
+            jar.from(target.provider(() ->
+                    bootstrapBukkit.resolve().stream()
+                            .map(target::zipTree)
+                            .collect(Collectors.toList())
+            ));
+
+            platformJar.get().getArchiveFile();
+
+            jar.doFirst(task -> {
+                Map<Object, Object> map = new HashMap<>();
+                try {
+                    for (File f : bootstrapBukkit.resolve()) {
+                        Map<Object, Object> n = pluginFile(f);
+                        if (n != null) {
+                            map.putAll(n);
+                        }
+                    }
+                    File generated = new File(jar.getTemporaryDir(), "plugin.yml");
+                    try (Writer w = new FileWriter(generated)) {
+                        new Yaml().dump(map, w);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to write merged plugin.yml", e);
+                    }
+
+                    // Put merged file at root of jar
+                    jar.from(generated, spec -> spec.into(""));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new RuntimeException("Failed to read manifest from dependency", e);
                 }
             });
-
-
-
-
         });
     }
 
@@ -181,6 +224,21 @@ public class GradlePlugin implements Plugin<Project> {
         configuration.setCanBeResolved(true);
         configuration.setVisible(false);
         return configuration;
+    }
+
+    private Map<Object, Object> pluginFile(File file) {
+        try (JarFile jf = new JarFile(file)) {
+            java.util.jar.JarEntry entry = jf.getJarEntry("plugin.yml");
+            if (entry != null) {
+                Yaml yaml = new Yaml();
+                try (InputStream in = jf.getInputStream(entry)) {
+                    return yaml.load(in);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to read manifest from dependency: " + file, e);
+        }
+        return null;
     }
 
 }

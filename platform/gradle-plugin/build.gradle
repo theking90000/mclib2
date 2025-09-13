@@ -19,4 +19,6 @@ jar {
 
 dependencies {
     implementation project(':platform:boot')
+
+    implementation 'org.yaml:snakeyaml:2.5'
 }
