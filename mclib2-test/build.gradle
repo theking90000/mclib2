@@ -28,3 +28,9 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+tasks.register("serverPlugin", Copy) {
+    dependsOn(tasks.bukkitJar)
+    from(tasks.bukkitJar)
+    into("./test-server/plugins")
+}

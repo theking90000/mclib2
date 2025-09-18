@@ -40,6 +40,10 @@ public abstract class PluginYaml extends DefaultTask {
             values.putAll(pluginFile(file));
         }
 
+        if(!values.containsValue("version")) {
+            values.put("version", getProject().getVersion().toString());
+        }
+
         File file = getOutputFile().get().getAsFile();
         file.getParentFile().mkdirs();
         try (FileWriter w = new FileWriter(file)) {

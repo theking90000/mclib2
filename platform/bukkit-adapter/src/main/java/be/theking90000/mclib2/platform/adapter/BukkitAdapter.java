@@ -15,7 +15,7 @@ public class BukkitAdapter extends JavaPlugin implements Runnable {
     public void onEnable() {
         getLogger().info("BukkitAdapter loading");
         try {
-            try (InputStream in = BukkitAdapter.class.getResourceAsStream("/plugin-descriptor.dat")) {
+            try (InputStream in = BukkitAdapter.class.getClassLoader().getResourceAsStream("plugin-descriptor.dat")) {
                 descriptor = PluginDescriptor.deserialize(in);
             }
 
