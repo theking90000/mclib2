@@ -7,7 +7,8 @@ public class PluginEntrypoint {
 
     @PlatformEntrypoint
     public PluginEntrypoint(JavaPlugin plugin) {
-        plugin.getLogger().info("Hello From PluginEntrypoint!");
+        plugin.getLogger().info("Hello From PluginEntrypoint !");
+        plugin.getLogger().info("Using main class : " + plugin.getClass().getCanonicalName());
     }
 
 }
