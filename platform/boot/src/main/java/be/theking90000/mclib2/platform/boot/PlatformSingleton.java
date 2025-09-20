@@ -12,10 +12,10 @@ public class PlatformSingleton {
 
     private static PlatformRegistry registry;
 
-    private static Class<PlatformSingleton> getPlatformSingleton() {
+    private static Class<PlatformSingleton> getPlatformSingleton(ClassLoader rootCl) {
         try {
-            ClassLoader cl = ClassLoader.getSystemClassLoader();
-            return (Class<PlatformSingleton>) cl.loadClass(PlatformSingleton.class.getCanonicalName());
+            // ClassLoader cl = ClassLoader.getSystemClassLoader();
+            return (Class<PlatformSingleton>) rootCl.loadClass(PlatformSingleton.class.getCanonicalName());
         } catch (Exception e) {
             throw new RuntimeException("Failed to get PlatformSingleton instance", e);
         }
@@ -30,8 +30,8 @@ public class PlatformSingleton {
     // but the Registry that will load via getPlatformSingleton() is from system classloader
     // if we try to cast PlatformRegistry from the system classloader to the one from the bukkit plugin classloader
     // it will throw an error. (and a quite confusing one because it says cannot cast A to A)
-    public static Object getRegistry() {
-        Class<PlatformSingleton> clazz = getPlatformSingleton();
+    public static Object getRegistry(ClassLoader rootCl) {
+        Class<PlatformSingleton> clazz = getPlatformSingleton(rootCl);
         try {
             Method m = clazz.getDeclaredMethod("getRegistry0");
             m.setAccessible(true);
@@ -49,9 +49,9 @@ public class PlatformSingleton {
     }
 
     /* Alias to "getRegistry().register(...)" via reflection. */
-    public static <T> int register(PluginDescriptor descriptor, T customData, ClassLoader callerClassLoader) {
+    public static <T> int register(PluginDescriptor descriptor, T customData, ClassLoader callerClassLoader, ClassLoader rootCl) {
         try {
-            Object registry = getRegistry();
+            Object registry = getRegistry(rootCl);
             Method m = registry.getClass().getDeclaredMethod("register", PluginDescriptor.class, Object.class, ClassLoader.class);
             return (int) m.invoke(registry, descriptor, customData, callerClassLoader);
         } catch (Exception e) {
@@ -60,9 +60,9 @@ public class PlatformSingleton {
     }
 
     /* Alias to "getRegistry().boot()" via reflection. */
-    public static int boot() {
+    public static int boot(ClassLoader rootCl) {
         try {
-            Object registry = getRegistry();
+            Object registry = getRegistry(rootCl);
             Method m = registry.getClass().getDeclaredMethod("boot");
             return (int) m.invoke(registry);
         } catch (Exception e) {
@@ -71,9 +71,9 @@ public class PlatformSingleton {
     }
 
     /* Alias to "getRegistry().register(...)" via reflection. */
-    public static <T> int unregister(PluginDescriptor descriptor) {
+    public static <T> int unregister(PluginDescriptor descriptor, ClassLoader rootCl) {
         try {
-            Object registry = getRegistry();
+            Object registry = getRegistry(rootCl);
             Method m = registry.getClass().getDeclaredMethod("unregister", PluginDescriptor.class);
             return (int) m.invoke(registry, descriptor);
         } catch (Exception e) {
@@ -82,9 +82,9 @@ public class PlatformSingleton {
     }
 
     /* Alias to "getRegistry().shutdown(...)" via reflection. */
-    public static <T> int shutdown() {
+    public static <T> int shutdown(ClassLoader rootCl) {
         try {
-            Object registry = getRegistry();
+            Object registry = getRegistry(rootCl);
             Method m = registry.getClass().getDeclaredMethod("shutdown");
             return (int) m.invoke(registry);
         } catch (Exception e) {

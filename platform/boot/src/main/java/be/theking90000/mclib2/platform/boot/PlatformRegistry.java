@@ -18,7 +18,7 @@ public class PlatformRegistry {
     private final Map<PluginDescriptor, RegisteredPlugin<?>> registeredPlugins = new HashMap<>();
     private final Set<RegisteredPlugin<?>> bootedPlugins = new HashSet<>();
 
-    protected PlatformRegistry() {
+    public PlatformRegistry() {
         platformClasspath = new PlatformClasspath();
     }
 
@@ -39,7 +39,7 @@ public class PlatformRegistry {
      * @param callerClassLoader the classloader of the caller
      * @return the number of dependencies loaded (excluding already loaded ones)
      */
-    protected <T> int register(PluginDescriptor descriptor, T customData, ClassLoader callerClassLoader) {
+    public  <T> int register(PluginDescriptor descriptor, T customData, ClassLoader callerClassLoader) {
         RegisteredPlugin<T> r = new RegisteredPlugin<>(descriptor, customData, platformClasspath.createPluginLoader(), callerClassLoader);
         this.registeredPlugins.put(descriptor, r);
 
@@ -65,7 +65,7 @@ public class PlatformRegistry {
      * @param descriptor the plugin descriptor
      * @return number of dependencies unloaded (if any, usually 0)
      */
-    protected int unregister(PluginDescriptor descriptor) {
+    public int unregister(PluginDescriptor descriptor) {
         RegisteredPlugin<?> r = this.registeredPlugins.get(descriptor);
         if (r != null && this.bootedPlugins.contains(r)) {
             return this.shutdownPlugin(r);
@@ -79,7 +79,7 @@ public class PlatformRegistry {
      *
      * @return the total number of dependencies loaded during this finalization (excluding already loaded ones).
      */
-    protected int boot() {
+    public int boot() {
         int loaded = 0;
         for (RegisteredPlugin<?> r : registeredPlugins.values()) {
             if (!bootedPlugins.contains(r)) {
@@ -95,7 +95,7 @@ public class PlatformRegistry {
      *
      * @return the total number of dependencies unloaded (if any, usually 0)
      */
-    protected int shutdown() {
+    public int shutdown() {
         int unloaded = 0;
         for (RegisteredPlugin<?> r : registeredPlugins.values()) {
             if (bootedPlugins.contains(r)) {

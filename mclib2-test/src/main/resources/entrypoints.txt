@@ -1,1 +1,2 @@
 be.theking90000.mclib2.test.TestEntrypoint
+be.theking90000.mclib2.test.PluginEntrypoint

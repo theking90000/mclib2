@@ -56,12 +56,29 @@ public final class PlatformBoot {
      * @param descriptor the plugin descriptor
      * @param <T>        type of the custom data
      * @param customData optional custom data passed by the platform adapter (e.g. Bukkit's JavaPlugin instance)
+     * @param rootCl     the root classloader to use for shared dependencies (usually the platform adapter's classloader)
+     * @return the number of dependencies loaded (excluding already loaded ones)
+     */
+    public static <T> int register(PluginDescriptor descriptor, T customData, ClassLoader rootCl) {
+        // PlatformBoot.class is loaded by the platform adapter's classloader;
+        // therefore, we pass it as the callerClassLoader
+        return PlatformSingleton.register(descriptor, customData, PlatformBoot.class.getClassLoader(), rootCl);
+    }
+
+    /**
+     * Registers and boots a plugin described by the given descriptor.
+     * alias of {@link #register(PluginDescriptor, Object, ClassLoader)}
+     * with System classloader as rootCl
+     *
+     * @param descriptor the plugin descriptor
+     * @param <T>        type of the custom data
+     * @param customData optional custom data passed by the platform adapter (e.g. Bukkit's JavaPlugin instance)
      * @return the number of dependencies loaded (excluding already loaded ones)
      */
     public static <T> int register(PluginDescriptor descriptor, T customData) {
         // PlatformBoot.class is loaded by the platform adapter's classloader;
         // therefore, we pass it as the callerClassLoader
-        return PlatformSingleton.register(descriptor, customData, PlatformBoot.class.getClassLoader());
+        return register(descriptor, customData, ClassLoader.getSystemClassLoader());
     }
 
     /**
@@ -75,29 +92,69 @@ public final class PlatformBoot {
      * </ol>
      *
      * @param descriptor the plugin descriptor
+     * @param rootCl     the root classloader to use for shared dependencies (usually the platform adapter's classloader)
+     * @return number of dependencies unloaded (if any, usually 0)
+     */
+    public static int unregister(PluginDescriptor descriptor, ClassLoader rootCl) {
+        return PlatformSingleton.unregister(descriptor, rootCl);
+    }
+
+    /**
+     * Unregisters and shuts down a plugin by name.
+     * alias of {@link #unregister(PluginDescriptor, ClassLoader)}
+     * with System classloader as rootCl
+     *
+     * @param descriptor the plugin descriptor
      * @return number of dependencies unloaded (if any, usually 0)
      */
     public static int unregister(PluginDescriptor descriptor) {
-        return PlatformSingleton.unregister(descriptor);
+        return unregister(descriptor, ClassLoader.getSystemClassLoader());
     }
+
+
 
     /**
      * Informs the platform boot system that all plugins have been registered.
      * This allows it to finalize loading, such as resolving shared dependencies and booting plugins.
      *
+     * @param rootCl     the root classloader to use for shared dependencies (usually the platform adapter's classloader)
+     * @return the total number of dependencies loaded during this finalization (excluding already loaded ones).
+     */
+    public static int boot(ClassLoader rootCl) {
+        return PlatformSingleton.boot(rootCl);
+    }
+
+    /**
+     * Informs the platform boot system that all plugins have been registered.
+     * This allows it to finalize loading, such as resolving shared dependencies and booting plugins.
+     * alias of {@link #boot(ClassLoader)}
+     * with System classloader as rootCl
+     *
      * @return the total number of dependencies loaded during this finalization (excluding already loaded ones).
      */
     public static int boot() {
-        return PlatformSingleton.boot();
+        return boot(ClassLoader.getSystemClassLoader());
     }
 
     /**
      * Shuts down all registered plugins and closes all resources.
      *
+     * @param rootCl     the root classloader to use for shared dependencies (usually the platform adapter's classloader)
+     * @return the total number of dependencies unloaded (if any, usually 0)
+     */
+    public static int shutdown(ClassLoader rootCl) {
+        return PlatformSingleton.shutdown(rootCl);
+    }
+
+    /**
+     * Shuts down all registered plugins and closes all resources.
+     * alias of {@link #shutdown(ClassLoader)}
+     * with System classloader as rootCl
+     *
      * @return the total number of dependencies unloaded (if any, usually 0)
      */
     public static int shutdown() {
-        return PlatformSingleton.shutdown();
+        return shutdown(ClassLoader.getSystemClassLoader());
     }
 
 }
