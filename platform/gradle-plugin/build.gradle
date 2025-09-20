@@ -21,4 +21,6 @@ dependencies {
     implementation project(':platform:boot')
 
     implementation 'org.yaml:snakeyaml:2.5'
+    implementation 'org.ow2.asm:asm:9.8'
+    implementation 'org.ow2.asm:asm-commons:9.8'
 }

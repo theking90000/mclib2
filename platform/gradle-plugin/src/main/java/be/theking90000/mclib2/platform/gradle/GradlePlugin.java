@@ -1,22 +1,19 @@
 package be.theking90000.mclib2.platform.gradle;
 
+import be.theking90000.mclib2.platform.gradle.tasks.BukkitPluginRenameTask;
 import be.theking90000.mclib2.platform.gradle.tasks.GeneratePluginDescriptor;
 import be.theking90000.mclib2.platform.gradle.tasks.PluginYaml;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
-import org.gradle.api.file.DuplicatesStrategy;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.jvm.tasks.Jar;
 import org.jetbrains.annotations.NotNull;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -178,22 +175,45 @@ public class GradlePlugin implements Plugin<Project> {
             bootstrapBukkit.getDependencies().add(dRes.resolve("be.theking90000.mclib2:platform-bukkit-adapter", "be.theking90000.mclib2:bukkit-adapter"));
         });
 
+        // This task is a trick that allows to rename the main class of the plugin
+        // Since bukkit uses a shared cached classloader for plugins, 2 plugins loaded with different classloader
+        // but using the same main class name will only be able to load the first one.
+        // To avoid this, we rename the main class of the plugin to a unique name based on the plugin coordinates
+        //
+        // It uses ASM to rename the class and all references to it in the code
+        // This will also detect plugin.yml and rename the main class there
+        TaskProvider<BukkitPluginRenameTask> renameTask =
+                target.getTasks().register("bukkitPluginRename", BukkitPluginRenameTask.class, task -> {
+                    task.setGroup("mclib2");
+
+                    task.dependsOn(bootstrapBukkit);
+
+                    task.getInput().setFrom(bootstrapBukkit);
+                    String s = target.getGroup().toString().replace(".", "_") + "_" +
+                            target.getName().replace("-", "_");  /* + "_" + target.getVersion().toString().replace(".", "_").replace("-", "_")*/;
+                            // Do not include version to avoid 2 different versions of the same plugin being loaded
+                    task.getNewClassName().set("be/theking90000/mclib2/platform/adapter/BukkitAdapter_" + s);
+                    task.getOutput().set(target.getLayout().getBuildDirectory().file("generated/renamed-bukkit-plugin.jar"));
+                });
+
         TaskProvider<PluginYaml> pluginYaml = target.getTasks()
                 .register("pluginYaml", PluginYaml.class, task -> {
                     task.setGroup("mclib2");
 
                     task.dependsOn(codeJar);
-                    task.dependsOn(bootstrapBukkit);
+                    task.dependsOn(renameTask);
 
                     SourceSetContainer sourceSets = target.getExtensions().getByType(SourceSetContainer.class);
                     SourceSet sourceSetOutput = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
 
                     task.getClasspath().setFrom(sourceSetOutput.getRuntimeClasspath().plus(
-                            bootstrapBukkit
+                            target.files(renameTask)
                     ));
 
                     task.getOutputFile().set(target.getLayout().getBuildDirectory().file("generated/plugin.yml"));
                 });
+
+
 
         TaskProvider<Jar> bukkitJar = target.getTasks().register("bukkitJar", Jar.class, jar -> {
             jar.setGroup("mclib2");
@@ -204,7 +224,7 @@ public class GradlePlugin implements Plugin<Project> {
             jar.getArchiveBaseName().set(target.getName() + "-bukkit");
 
 
-            jar.dependsOn(bootstrapBukkit);
+            jar.dependsOn(renameTask);
 
             jar.from(target.provider(() -> target.zipTree(platformJar.get().getArchiveFile().get().getAsFile())),
                     copy -> copy.into(".").exclude("plugin.yml"));
@@ -212,9 +232,7 @@ public class GradlePlugin implements Plugin<Project> {
             jar.from(pluginYaml, copy->copy.into("."));
 
             jar.from(target.provider(() ->
-                    bootstrapBukkit.resolve().stream()
-                            .map(target::zipTree)
-                            .collect(Collectors.toList())
+                    target.zipTree(renameTask.get().getOutput())
             ), cp->cp.exclude("plugin.yml"));
 
             platformJar.get().getArchiveFile();
