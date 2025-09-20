@@ -11,6 +11,6 @@ public class TestEntrypoint {
 
     @PlatformEntrypoint
     public TestEntrypoint() {
-        logger.info( "TestEntrypoint initialized");
+        logger.info("TestEntrypoint initialized");
     }
 }

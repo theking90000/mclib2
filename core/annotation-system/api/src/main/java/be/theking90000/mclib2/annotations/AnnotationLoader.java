@@ -36,6 +36,7 @@ import java.lang.annotation.*;
 public @interface AnnotationLoader {
     /**
      * The annotation type that this loader is responsible for.
+     *
      * @return the annotation class this loader handles
      */
     Class<? extends Annotation> value();

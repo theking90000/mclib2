@@ -1,7 +1,5 @@
 package be.theking90000.mclib2.runtime;
 
-import be.theking90000.mclib2.annotations.InjectStrategy;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;

@@ -129,7 +129,7 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
 
     private void writeAnnotationMappings() throws IOException {
-        if(annotationMappings.isEmpty()) return;
+        if (annotationMappings.isEmpty()) return;
 
         for (Map.Entry<String, Set<String>> entry : annotationMappings.entrySet()) {
             String annotation = entry.getKey();

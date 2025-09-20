@@ -33,7 +33,6 @@ public class RegisteredAnnotationsProcessorTest {
         );
 
 
-
         // Run compilation with your processor
         Compilation compilation = Compiler.javac()
                 .withProcessors(new AnnotationProcessor())
