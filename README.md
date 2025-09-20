@@ -181,42 +181,16 @@ public class MyBukkitPlugin {
 - Event system integration
 
 ### 📋 Planned
-- Velocity platform support
-- Fabric platform support
-- Spring integration module
 - Comprehensive documentation and examples
-
-## 🤝 Contributing
-
-MCLIB2 is in active development. Contributions are welcome!
-
-### Building from Source
-
-```bash
-git clone https://github.com/yourusername/mclib2.git
-cd mclib2
-./gradlew build
-```
-
-### Testing
-
-The project includes a test module (`mclib2-test`) that demonstrates usage:
-
-```bash
-./gradlew :mclib2-test:build
-./gradlew :mclib2-test:serverPlugin  # Copies plugin to test server
-```
-
-## 📄 License
-
-[Add your license information here]
-
-## 🔗 Links
-
-- [Documentation](docs/) *(Coming Soon)*
-- [Examples](examples/) *(Coming Soon)*
-- [API Reference](api-docs/) *(Coming Soon)*
+- Complete Bukkit/Spigot integration
+- Database and ORM support
 
 ---
 
 **MCLIB2** - Simplifying Minecraft plugin development through modern Java practices and tooling.
+
+---
+
+Feel free to use MCLIB2 in your own software, but the source code remains the property of the author and may not be redistributed or modified without explicit permission.
+
+Copyright © 2025 theking90000. All rights reserved.
