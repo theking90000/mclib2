@@ -19,16 +19,6 @@ public abstract class ClasspathEntry implements Serializable {
         this.globalID = globalID;
     }
 
-    public String getGlobalID() {
-        return globalID;
-    }
-
-    public String getUniqueID() {
-        return uniqueID;
-    }
-
-    public abstract URL resolve(ClassLoader requestedBy) throws Exception;
-
     protected static String sha256(InputStream in) throws Exception {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
 
@@ -61,6 +51,16 @@ public abstract class ClasspathEntry implements Serializable {
     public static ClasspathEntry cached(ClasspathEntry delegate, String sha256) {
         return new CachedClasspathEntry(delegate, sha256);
     }
+
+    public String getGlobalID() {
+        return globalID;
+    }
+
+    public String getUniqueID() {
+        return uniqueID;
+    }
+
+    public abstract URL resolve(ClassLoader requestedBy) throws Exception;
 
     public ClasspathEntry cached(String sha256) {
         return cached(this, sha256);

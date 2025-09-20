@@ -1,9 +1,6 @@
 package be.theking90000.mclib2.platform.classpath;
 
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Path;
 
 public class ChildFirstClassLoader extends NestedURLClassLoader /*URLClassLoader*/ implements ClasspathAppender {
 
@@ -22,25 +19,6 @@ public class ChildFirstClassLoader extends NestedURLClassLoader /*URLClassLoader
     @Override
     public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         return super.loadClass(name, resolve);
-       /* synchronized (getClassLoadingLock(name)) {
-            // First, check if the class has already been loaded
-            Class<?> loadedClass = findLoadedClass(name);
-            if (loadedClass == null) {
-                try {
-                    loadedClass = super.findClass(name);
-                } catch (ClassNotFoundException e) {
-                    // class is not found in the given urls.
-                    // Let's try it in parent classloader.
-                    // If class is still not found, then this method will throw class not found ex.
-                    loadedClass = super.loadClass(name, resolve);
-                }
-            }
-
-            if (resolve) {      // marked to resolve
-                resolveClass(loadedClass);
-            }
-            return loadedClass;
-        }*/
     }
 
 

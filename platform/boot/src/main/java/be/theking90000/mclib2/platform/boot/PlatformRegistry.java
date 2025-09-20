@@ -13,10 +13,9 @@ import java.util.Set;
 
 public class PlatformRegistry {
 
-    private PlatformClasspath platformClasspath;
-
     private final Map<PluginDescriptor, RegisteredPlugin<?>> registeredPlugins = new HashMap<>();
     private final Set<RegisteredPlugin<?>> bootedPlugins = new HashSet<>();
+    private PlatformClasspath platformClasspath;
 
     public PlatformRegistry() {
         platformClasspath = new PlatformClasspath();

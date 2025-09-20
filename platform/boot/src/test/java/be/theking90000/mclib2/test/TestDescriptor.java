@@ -29,10 +29,10 @@ public class TestDescriptor {
 
     private void addSelf(Set<ClasspathEntry> deps) throws Exception {
         String pp = System.getProperty("java.class.path");
-        String[] p = pp.split(pp.contains(";")? ";":":");
+        String[] p = pp.split(pp.contains(";") ? ";" : ":");
         for (String s : p) {
             if (s.contains("classes/java/test") || s.contains("classes\\java\\test")) {
-                deps.add(ClasspathEntry.url("code", "0", new URL("file://" + s +"/")));
+                deps.add(ClasspathEntry.url("code", "0", new URL("file://" + s + "/")));
             }
         }
     }

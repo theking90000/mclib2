@@ -2,7 +2,6 @@ package be.theking90000.mclib2.platform.adapter;
 
 import be.theking90000.mclib2.platform.PluginDescriptor;
 import be.theking90000.mclib2.platform.boot.PlatformBoot;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
@@ -43,14 +42,5 @@ public class BukkitAdapter extends JavaPlugin implements Runnable {
             PlatformBoot.unregister(descriptor, getClassLoader());
             descriptor = null;
         }
-    }
-
-    private <T> T findServiceByClassName(String name) {
-        for (Class<?> c : Bukkit.getServicesManager().getKnownServices()) {
-            if (c.getCanonicalName().equals(name)) {
-                return (T) Bukkit.getServicesManager().load(c);
-            }
-        }
-        return null;
     }
 }

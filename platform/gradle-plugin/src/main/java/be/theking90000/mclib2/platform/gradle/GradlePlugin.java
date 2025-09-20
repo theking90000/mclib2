@@ -32,6 +32,9 @@ public class GradlePlugin implements Plugin<Project> {
             "be.theking90000.mclib2:platform-boot",
     };
 
+    public static String getVersion() {
+        return GradlePlugin.class.getPackage().getImplementationVersion();
+    }
 
     @Override
     public void apply(@NotNull Project target) {
@@ -190,8 +193,9 @@ public class GradlePlugin implements Plugin<Project> {
 
                     task.getInput().setFrom(bootstrapBukkit);
                     String s = target.getGroup().toString().replace(".", "_") + "_" +
-                            target.getName().replace("-", "_");  /* + "_" + target.getVersion().toString().replace(".", "_").replace("-", "_")*/;
-                            // Do not include version to avoid 2 different versions of the same plugin being loaded
+                            target.getName().replace("-", "_");  /* + "_" + target.getVersion().toString().replace(".", "_").replace("-", "_")*/
+                    ;
+                    // Do not include version to avoid 2 different versions of the same plugin being loaded
                     task.getNewClassName().set("be/theking90000/mclib2/platform/adapter/BukkitAdapter_" + s);
                     task.getOutput().set(target.getLayout().getBuildDirectory().file("generated/renamed-bukkit-plugin.jar"));
                 });
@@ -214,7 +218,6 @@ public class GradlePlugin implements Plugin<Project> {
                 });
 
 
-
         TaskProvider<Jar> bukkitJar = target.getTasks().register("bukkitJar", Jar.class, jar -> {
             jar.setGroup("mclib2");
 
@@ -229,19 +232,15 @@ public class GradlePlugin implements Plugin<Project> {
             jar.from(target.provider(() -> target.zipTree(platformJar.get().getArchiveFile().get().getAsFile())),
                     copy -> copy.into(".").exclude("plugin.yml"));
 
-            jar.from(pluginYaml, copy->copy.into("."));
+            jar.from(pluginYaml, copy -> copy.into("."));
 
             jar.from(target.provider(() ->
                     target.zipTree(renameTask.get().getOutput())
-            ), cp->cp.exclude("plugin.yml"));
+            ), cp -> cp.exclude("plugin.yml"));
 
             platformJar.get().getArchiveFile();
 
         });
-    }
-
-    public static String getVersion() {
-        return GradlePlugin.class.getPackage().getImplementationVersion();
     }
 
     private Configuration createConfiguration(Project project, String name) {

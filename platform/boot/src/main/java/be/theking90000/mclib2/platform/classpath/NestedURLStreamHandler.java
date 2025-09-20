@@ -57,16 +57,16 @@ import java.net.URLStreamHandler;
  * @since 1.2.22
  */
 class NestedURLStreamHandler extends URLStreamHandler {
-   private NestedURLConnection nestedJarURLConnection;
+    private NestedURLConnection nestedJarURLConnection;
 
-   public NestedURLStreamHandler() {
-   }
+    public NestedURLStreamHandler() {
+    }
 
-   @Override
-   protected URLConnection openConnection(URL url) throws IOException {
-      if (nestedJarURLConnection == null) {
-         nestedJarURLConnection = new NestedURLConnection(url);
-      }
-      return nestedJarURLConnection;
-   }
+    @Override
+    protected URLConnection openConnection(URL url) throws IOException {
+        if (nestedJarURLConnection == null) {
+            nestedJarURLConnection = new NestedURLConnection(url);
+        }
+        return nestedJarURLConnection;
+    }
 }

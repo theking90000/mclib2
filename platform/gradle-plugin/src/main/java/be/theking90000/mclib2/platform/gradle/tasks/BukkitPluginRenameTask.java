@@ -21,6 +21,24 @@ import java.util.jar.JarOutputStream;
 
 public abstract class BukkitPluginRenameTask extends DefaultTask {
 
+    private Set<String> writtenEntries = new HashSet<>();
+
+    public BukkitPluginRenameTask() {
+        getOldClassName().convention("be/theking90000/mclib2/platform/adapter/BukkitAdapter");
+    }
+
+    public static String readToString(InputStream in) throws IOException {
+        StringWriter writer = new StringWriter();
+        try (Reader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+            char[] buffer = new char[1024];
+            int n;
+            while ((n = reader.read(buffer)) != -1) {
+                writer.write(buffer, 0, n);
+            }
+        }
+        return writer.toString();
+    }
+
     @InputFiles
     @Classpath
     public abstract ConfigurableFileCollection getInput();
@@ -33,12 +51,6 @@ public abstract class BukkitPluginRenameTask extends DefaultTask {
 
     @OutputFile
     public abstract RegularFileProperty getOutput();
-
-    private Set<String> writtenEntries = new HashSet<>();
-
-    public BukkitPluginRenameTask() {
-        getOldClassName().convention("be/theking90000/mclib2/platform/adapter/BukkitAdapter");
-    }
 
     private boolean alreadyAdded(JarOutputStream jos, String name) {
         return !writtenEntries.add(name); // true if duplicate
@@ -54,10 +66,10 @@ public abstract class BukkitPluginRenameTask extends DefaultTask {
 
         outputJar.getParentFile().mkdirs();
 
-        try(FileOutputStream fos = new FileOutputStream(outputJar);
-            JarOutputStream jos = new JarOutputStream(fos)) {
+        try (FileOutputStream fos = new FileOutputStream(outputJar);
+             JarOutputStream jos = new JarOutputStream(fos)) {
 
-            for(File inputJar : getInput()) {
+            for (File inputJar : getInput()) {
                 try (JarFile jarFile = new JarFile(inputJar)) {
                     Enumeration<JarEntry> entries = jarFile.entries();
                     JarEntry entry;
@@ -69,15 +81,15 @@ public abstract class BukkitPluginRenameTask extends DefaultTask {
                         try (InputStream is = jarFile.getInputStream(entry)) {
                             String name = entry.getName();
 
-                            if(alreadyAdded(jos, name)) continue;
+                            if (alreadyAdded(jos, name)) continue;
 
-                            if(name.endsWith(".class")) {
+                            if (name.endsWith(".class")) {
                                 byte[] modifiedClass = processClass(is);
                                 String outName = name.equals(getOldClassName().get() + ".class") ? getNewClassName().get() + ".class" : name;
                                 jos.putNextEntry(new JarEntry(outName));
                                 jos.write(modifiedClass);
                                 jos.closeEntry();
-                            } else if(name.equals("plugin.yml")) {
+                            } else if (name.equals("plugin.yml")) {
                                 String file = readToString(is);
                                 file = file.replace("main: " + javaName(getOldClassName().get()), "main: " + javaName(getNewClassName().get()));
                                 jos.putNextEntry(new JarEntry(name));
@@ -100,7 +112,6 @@ public abstract class BukkitPluginRenameTask extends DefaultTask {
         }
     }
 
-
     private byte[] processClass(InputStream is) throws IOException {
         ClassReader cr = new ClassReader(is);
         ClassWriter cw = new ClassWriter(0);
@@ -117,18 +128,6 @@ public abstract class BukkitPluginRenameTask extends DefaultTask {
                 });
         cr.accept(cv, 0);
         return cw.toByteArray();
-    }
-
-    public static String readToString(InputStream in) throws IOException {
-        StringWriter writer = new StringWriter();
-        try (Reader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
-            char[] buffer = new char[1024];
-            int n;
-            while ((n = reader.read(buffer)) != -1) {
-                writer.write(buffer, 0, n);
-            }
-        }
-        return writer.toString();
     }
 
 }

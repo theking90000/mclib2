@@ -46,26 +46,12 @@ the project website at the project page on https://sourceforge.net/projects/mdiu
  */
 package be.theking90000.mclib2.platform.classpath;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -75,34 +61,34 @@ import java.util.jar.JarInputStream;
  * @since 1.2.23
  */
 public class NestedURLClassLoader extends URLClassLoader implements ClasspathAppender {
-   private final Map<String, Set<URL>> resources = new HashMap();
-   private final Map<String, byte[]> byteCache = new HashMap<>();
-   private final Map<String, Class<?>> classes = new HashMap<>();
-   private Set<String> filteredPackages = null;
-   private boolean excludingFilter = true;
+    private final Map<String, Set<URL>> resources = new HashMap();
+    private final Map<String, byte[]> byteCache = new HashMap<>();
+    private final Map<String, Class<?>> classes = new HashMap<>();
+    private Set<String> filteredPackages = null;
+    private boolean excludingFilter = true;
 
-   /**
-    * Constructs a new NestedURLClassLoader for the specified URLs using the default delegation parent ClassLoader.
-    *
-    * @param urls the URLs from which to load classes and resources
-    */
-   public NestedURLClassLoader(URL[] urls) {
-      super(urls);
-      setContextClassLoaderImpl();
-      addURLs(urls);
-   }
+    /**
+     * Constructs a new NestedURLClassLoader for the specified URLs using the default delegation parent ClassLoader.
+     *
+     * @param urls the URLs from which to load classes and resources
+     */
+    public NestedURLClassLoader(URL[] urls) {
+        super(urls);
+        setContextClassLoaderImpl();
+        addURLs(urls);
+    }
 
-   /**
-    * Constructs a new NestedURLClassLoader for the specified URLs using a specified parent ClassLoader.
-    *
-    * @param urls the URLs from which to load classes and resources
-    * @param parent the parent ClassLoader
-    */
-   public NestedURLClassLoader(URL[] urls, ClassLoader parent) {
-      super(urls, parent);
-      setContextClassLoaderImpl();
-      addURLs(urls);
-   }
+    /**
+     * Constructs a new NestedURLClassLoader for the specified URLs using a specified parent ClassLoader.
+     *
+     * @param urls   the URLs from which to load classes and resources
+     * @param parent the parent ClassLoader
+     */
+    public NestedURLClassLoader(URL[] urls, ClassLoader parent) {
+        super(urls, parent);
+        setContextClassLoaderImpl();
+        addURLs(urls);
+    }
 
     @Override
     public void appendUrlToClasspath(URL url) {
@@ -110,205 +96,205 @@ public class NestedURLClassLoader extends URLClassLoader implements ClasspathApp
     }
 
     /**
-    * Exclude or include some packages from the special class loading used by this class.
-    *
-    * <h1>Algorithm</h1>
-    * <ul>
-    * <li>If <code>excludingFilter</code> is true: packages which are in the Set will be loaded using the default behavior
-    * of the <code>URLClassLoader</code>, all other packages will be loaded using the special behavior of this Class</li>
-    * <li>If <code>excludingFilter</code> is false: packages which are not in the set will be loaded using the default behavior
-    * of the <code>URLClassLoader</code>, all packages in the Set will be loaded using the special behavior of this Class</li>
-    * </ul>
-    *
-    * @param excludingFilter true if the packages will be excluded if they belong to the packages Set
-    * @param filteredPackages the packages
-    */
-   public void filterPackages(boolean excludingFilter, Set<String> filteredPackages) {
-      this.filteredPackages = filteredPackages;
-      this.excludingFilter = excludingFilter;
-   }
+     * Exclude or include some packages from the special class loading used by this class.
+     *
+     * <h1>Algorithm</h1>
+     * <ul>
+     * <li>If <code>excludingFilter</code> is true: packages which are in the Set will be loaded using the default behavior
+     * of the <code>URLClassLoader</code>, all other packages will be loaded using the special behavior of this Class</li>
+     * <li>If <code>excludingFilter</code> is false: packages which are not in the set will be loaded using the default behavior
+     * of the <code>URLClassLoader</code>, all packages in the Set will be loaded using the special behavior of this Class</li>
+     * </ul>
+     *
+     * @param excludingFilter  true if the packages will be excluded if they belong to the packages Set
+     * @param filteredPackages the packages
+     */
+    public void filterPackages(boolean excludingFilter, Set<String> filteredPackages) {
+        this.filteredPackages = filteredPackages;
+        this.excludingFilter = excludingFilter;
+    }
 
-   /**
-    * Exclude or include some packages from the special class loading used by this class.
-    *
-    * @param excludingFilter true if the packages will be excluded if they belong to the packages set
-    * @param filteredPackages the packages
-    */
-   public void filterPackages(boolean excludingFilter, String... filteredPackages) {
-      if (this.filteredPackages == null) {
-         this.filteredPackages = new HashSet<>();
-         this.excludingFilter = excludingFilter;
-      }
-      this.filteredPackages.addAll(Arrays.asList(filteredPackages));
-   }
+    /**
+     * Exclude or include some packages from the special class loading used by this class.
+     *
+     * @param excludingFilter  true if the packages will be excluded if they belong to the packages set
+     * @param filteredPackages the packages
+     */
+    public void filterPackages(boolean excludingFilter, String... filteredPackages) {
+        if (this.filteredPackages == null) {
+            this.filteredPackages = new HashSet<>();
+            this.excludingFilter = excludingFilter;
+        }
+        this.filteredPackages.addAll(Arrays.asList(filteredPackages));
+    }
 
-   private void setContextClassLoaderImpl() {
-      Thread.currentThread().setContextClassLoader(this);
-   }
+    private void setContextClassLoaderImpl() {
+        Thread.currentThread().setContextClassLoader(this);
+    }
 
-   @Override
-   protected void addURL(URL url) {
-      addURLs(url);
-   }
+    @Override
+    protected void addURL(URL url) {
+        addURLs(url);
+    }
 
-   private void addURLs(URL... urls) {
-      if (urls == null) {
-         return;
-      }
-      try {
-         for (URL url : urls) {
-            addResource(url);
-         }
-      } catch (IOException e) {
-      }
-   }
-
-   private void addResource(URL url) throws IOException {
-      if (url.getProtocol().equals("jar")) {
-         try (InputStream urlStream = url.openStream(); BufferedInputStream bufferedInputStream = new BufferedInputStream(urlStream); JarInputStream jarInputStream = new JarInputStream(bufferedInputStream)) {
-            JarEntry jarEntry;
-
-            while ((jarEntry = jarInputStream.getNextJarEntry()) != null) {
-               String spec;
-               if (url.getProtocol().equals("jar")) {
-                  spec = url.getPath();
-               } else {
-                  spec = url.getProtocol() + ":" + url.getPath();
-               }
-               URL theURL = new URL(null, "jar:" + spec + "!/" + jarEntry.getName(), new NestedURLStreamHandler());
-               addURLToResource(jarEntry.getName(), theURL);
-               addClassFromInputStream(jarInputStream, jarEntry.getName());
-               if (jarEntry.getName().endsWith(".jar")) {
-                  addResource(theURL);
-               }
+    private void addURLs(URL... urls) {
+        if (urls == null) {
+            return;
+        }
+        try {
+            for (URL url : urls) {
+                addResource(url);
             }
-         }
-      } else if (url.getPath().endsWith(".class")) {
-         throw new IllegalStateException("Cannot add classes directly");
-      } else {
-         try {
-            addDirectory(new File(url.toURI()));
-         } catch (URISyntaxException e) {
-            throw new IllegalStateException(e);
-         }
-      }
-   }
+        } catch (IOException e) {
+        }
+    }
 
-   // Begin Modified
-   private void addFile(File file, File directory) throws IOException {
-       if (file.isDirectory()) {
-           addDirectory(file);
-       } else if (file.getName().endsWith(".jar")) {
-           try {
-               super.addURL(file.toURI().toURL());
-           } catch (IOException e) {
-               throw new IllegalStateException(e);
-           }
-       } else if (directory!=null) {
-           try {
-               String relativeName = directory.toURI().relativize(file.toURI()).getPath();
-               try (FileInputStream fileInputStream = new FileInputStream(file)) {
-                   addClassFromInputStream(fileInputStream, relativeName);
-                   addURLToResource(relativeName, file.toURI().toURL());
-               }
-           } catch (MalformedURLException | FileNotFoundException e) {
-               throw new IllegalStateException(e);
-           }
-       }
-   } // End Modified
+    private void addResource(URL url) throws IOException {
+        if (url.getProtocol().equals("jar")) {
+            try (InputStream urlStream = url.openStream(); BufferedInputStream bufferedInputStream = new BufferedInputStream(urlStream); JarInputStream jarInputStream = new JarInputStream(bufferedInputStream)) {
+                JarEntry jarEntry;
 
-   private void addDirectory(File directory) throws IOException {
-      if (!directory.isDirectory()) {
-          addFile(directory, null);
-          return;
-          // throw new IllegalStateException("Not a directory: " + directory);
-      }
-      File[] files = directory.listFiles();
-      if (files == null) {
-         throw new IllegalStateException("No files found in " + directory);
-      }
-      for (File file : files) {
-         addFile(file, directory);
-      }
-   }
+                while ((jarEntry = jarInputStream.getNextJarEntry()) != null) {
+                    String spec;
+                    if (url.getProtocol().equals("jar")) {
+                        spec = url.getPath();
+                    } else {
+                        spec = url.getProtocol() + ":" + url.getPath();
+                    }
+                    URL theURL = new URL(null, "jar:" + spec + "!/" + jarEntry.getName(), new NestedURLStreamHandler());
+                    addURLToResource(jarEntry.getName(), theURL);
+                    addClassFromInputStream(jarInputStream, jarEntry.getName());
+                    if (jarEntry.getName().endsWith(".jar")) {
+                        addResource(theURL);
+                    }
+                }
+            }
+        } else if (url.getPath().endsWith(".class")) {
+            throw new IllegalStateException("Cannot add classes directly");
+        } else {
+            try {
+                addDirectory(new File(url.toURI()));
+            } catch (URISyntaxException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
 
-   private void addClassFromInputStream(InputStream inputStream, String relativePath) throws IOException {
-      if (relativePath.endsWith(".class")) {
-         int len;
-         ByteArrayOutputStream out = new ByteArrayOutputStream();
-         byte[] b = new byte[2048];
+    // Begin Modified
+    private void addFile(File file, File directory) throws IOException {
+        if (file.isDirectory()) {
+            addDirectory(file);
+        } else if (file.getName().endsWith(".jar")) {
+            try {
+                super.addURL(file.toURI().toURL());
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        } else if (directory != null) {
+            try {
+                String relativeName = directory.toURI().relativize(file.toURI()).getPath();
+                try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                    addClassFromInputStream(fileInputStream, relativeName);
+                    addURLToResource(relativeName, file.toURI().toURL());
+                }
+            } catch (MalformedURLException | FileNotFoundException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    } // End Modified
 
-         while ((len = inputStream.read(b)) > 0) {
-            out.write(b, 0, len);
-         }
-         out.close();
-         byte[] classBytes = out.toByteArray();
-         String className = resourceToClassName(relativePath);
-         addToByteCache(className, classBytes);
-      }
-   }
+    private void addDirectory(File directory) throws IOException {
+        if (!directory.isDirectory()) {
+            addFile(directory, null);
+            return;
+            // throw new IllegalStateException("Not a directory: " + directory);
+        }
+        File[] files = directory.listFiles();
+        if (files == null) {
+            throw new IllegalStateException("No files found in " + directory);
+        }
+        for (File file : files) {
+            addFile(file, directory);
+        }
+    }
 
-   private void addToByteCache(String className, byte[] classBytes) {
-      byteCache.put(className, classBytes);
-   }
+    private void addClassFromInputStream(InputStream inputStream, String relativePath) throws IOException {
+        if (relativePath.endsWith(".class")) {
+            int len;
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] b = new byte[2048];
 
-   private String resourceToClassName(String slashed) {
-      return slashed.substring(0, slashed.lastIndexOf(".class")).replace("/", ".");
-   }
+            while ((len = inputStream.read(b)) > 0) {
+                out.write(b, 0, len);
+            }
+            out.close();
+            byte[] classBytes = out.toByteArray();
+            String className = resourceToClassName(relativePath);
+            addToByteCache(className, classBytes);
+        }
+    }
 
-   private void addURLToResource(String name, URL url) {
-      Set<URL> set;
-      if (resources.containsKey(name)) {
-         set = resources.get(name);
-      } else {
-         set = new HashSet<>();
-         resources.put(name, set);
-      }
-      set.add(url);
-   }
+    private void addToByteCache(String className, byte[] classBytes) {
+        byteCache.put(className, classBytes);
+    }
 
-   private Class<?> loadFromSuperClassImpl(String name, boolean resolve) throws ClassNotFoundException {
-      Iterator<String> it = filteredPackages.iterator();
-      while (it.hasNext()) {
-         String thePackage = it.next() + ".";
-         if (excludingFilter && name.startsWith(thePackage)) {
-            return super.loadClass(name, resolve);
-         } else if (!excludingFilter && !name.startsWith(thePackage)) {
-            return super.loadClass(name, resolve);
-         }
-      }
-      return null;
-   }
+    private String resourceToClassName(String slashed) {
+        return slashed.substring(0, slashed.lastIndexOf(".class")).replace("/", ".");
+    }
 
-   @Override
-   public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-       synchronized (getClassLoadingLock(name)) {
-           // First, check if the class has already been loaded
-           Class<?> loadedClass = findLoadedClass(name);
+    private void addURLToResource(String name, URL url) {
+        Set<URL> set;
+        if (resources.containsKey(name)) {
+            set = resources.get(name);
+        } else {
+            set = new HashSet<>();
+            resources.put(name, set);
+        }
+        set.add(url);
+    }
 
-           if (loadedClass == null) {
-               try {
-                     loadedClass = findLocalClassImpl(name, resolve);
-               } catch (NullPointerException e) {
-               }
-           }
+    private Class<?> loadFromSuperClassImpl(String name, boolean resolve) throws ClassNotFoundException {
+        Iterator<String> it = filteredPackages.iterator();
+        while (it.hasNext()) {
+            String thePackage = it.next() + ".";
+            if (excludingFilter && name.startsWith(thePackage)) {
+                return super.loadClass(name, resolve);
+            } else if (!excludingFilter && !name.startsWith(thePackage)) {
+                return super.loadClass(name, resolve);
+            }
+        }
+        return null;
+    }
 
-           if (loadedClass == null) {
-               try {
-                   loadedClass = super.findClass(name);
-               } catch (ClassNotFoundException e) {
-                   // class is not found in the given urls.
-                   // Let's try it in parent classloader.
-                   // If class is still not found, then this method will throw class not found ex.
-                   loadedClass = super.loadClass(name, resolve);
-               }
-           }
+    @Override
+    public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        synchronized (getClassLoadingLock(name)) {
+            // First, check if the class has already been loaded
+            Class<?> loadedClass = findLoadedClass(name);
 
-           if (resolve) {      // marked to resolve
-               resolveClass(loadedClass);
-           }
-           return loadedClass;
-       }
+            if (loadedClass == null) {
+                try {
+                    loadedClass = findLocalClassImpl(name, resolve);
+                } catch (NullPointerException e) {
+                }
+            }
+
+            if (loadedClass == null) {
+                try {
+                    loadedClass = super.findClass(name);
+                } catch (ClassNotFoundException e) {
+                    // class is not found in the given urls.
+                    // Let's try it in parent classloader.
+                    // If class is still not found, then this method will throw class not found ex.
+                    loadedClass = super.loadClass(name, resolve);
+                }
+            }
+
+            if (resolve) {      // marked to resolve
+                resolveClass(loadedClass);
+            }
+            return loadedClass;
+        }
       /*if (name.startsWith("java.") || name.startsWith("javax.")) {
          found = getSystemClassLoader().loadClass(name);
       } else if (name.startsWith("javafx.")) {
@@ -333,87 +319,87 @@ public class NestedURLClassLoader extends URLClassLoader implements ClasspathApp
          return found;
       }
       throw new ClassNotFoundException(name);*/
-   }
+    }
 
-   private URL findLocalResource(String name) {
-      Set<URL> foundResources = findLocalResources(name);
-      if (foundResources.size() > 0) {
-         return foundResources.iterator().next();
-      }
-      return null;
-   }
+    private URL findLocalResource(String name) {
+        Set<URL> foundResources = findLocalResources(name);
+        if (foundResources.size() > 0) {
+            return foundResources.iterator().next();
+        }
+        return null;
+    }
 
-   private Set<URL> findLocalResources(String name) {
-      return resources.get(name);
-   }
+    private Set<URL> findLocalResources(String name) {
+        return resources.get(name);
+    }
 
-   @Override
-   public URL findResource(String name) {
-      URL foundResource = findLocalResource(name);
-      if(foundResource == null) {
-         foundResource = super.findResource(name);
-      }
-      return foundResource;
-   }
+    @Override
+    public URL findResource(String name) {
+        URL foundResource = findLocalResource(name);
+        if (foundResource == null) {
+            foundResource = super.findResource(name);
+        }
+        return foundResource;
+    }
 
-   @Override
-   public Enumeration<URL> findResources(String name) throws IOException {
-      Set<URL> combinedResources = new LinkedHashSet<>();
-       Set<URL> localResources = findLocalResources(name);
+    @Override
+    public Enumeration<URL> findResources(String name) throws IOException {
+        Set<URL> combinedResources = new LinkedHashSet<>();
+        Set<URL> localResources = findLocalResources(name);
 
-       if(localResources != null) {
-           combinedResources.addAll(localResources);
-       }
-       Enumeration<URL> resources = super.findResources(name);
-       while (resources.hasMoreElements()) {
-              combinedResources.add(resources.nextElement());
-       }
+        if (localResources != null) {
+            combinedResources.addAll(localResources);
+        }
+        Enumeration<URL> resources = super.findResources(name);
+        while (resources.hasMoreElements()) {
+            combinedResources.add(resources.nextElement());
+        }
 
         return Collections.enumeration(combinedResources);
-   }
+    }
 
-   private Class<?> findLocalClassImpl(String className, boolean resolve) throws ClassNotFoundException {
-      return getLoadedClass(className, resolve);
-   }
+    private Class<?> findLocalClassImpl(String className, boolean resolve) throws ClassNotFoundException {
+        return getLoadedClass(className, resolve);
+    }
 
-   private void definePackageForClass(String className) {
-      int i = className.lastIndexOf('.');
-      if (i != -1) {
-         String pkgname = className.substring(0, i);
-         // define the package if it is not already defined
-         Package pkg = getPackage(pkgname);
-         if (pkg == null) {
-            definePackage(pkgname, null, null, null, null, null, null, null);
-         }
-      }
-   }
-
-   protected Class<?> getLoadedClass(String className, boolean resolve) throws ClassNotFoundException {
-      synchronized (getClassLoadingLock(className)) {
-
-         Class<?> loadedClass = findLoadedClass(className);
-         if (classes.containsKey(className)) {
-            return classes.get(className);
-         }
-         if (byteCache.containsKey(className)) {
-            definePackageForClass(className);
-            byte[] classBytes = byteCache.get(className);
-
-            if (loadedClass == null) {
-               try {
-                  loadedClass = defineClass(className, classBytes, 0, classBytes.length, this.getClass().getProtectionDomain());
-               } catch (NoClassDefFoundError | IncompatibleClassChangeError e) {
-                  throw new ClassNotFoundException(className, e);
-               }
+    private void definePackageForClass(String className) {
+        int i = className.lastIndexOf('.');
+        if (i != -1) {
+            String pkgname = className.substring(0, i);
+            // define the package if it is not already defined
+            Package pkg = getPackage(pkgname);
+            if (pkg == null) {
+                definePackage(pkgname, null, null, null, null, null, null, null);
             }
-            classes.put(className, loadedClass);
-            if (resolve) {
-               resolveClass(loadedClass);
+        }
+    }
+
+    protected Class<?> getLoadedClass(String className, boolean resolve) throws ClassNotFoundException {
+        synchronized (getClassLoadingLock(className)) {
+
+            Class<?> loadedClass = findLoadedClass(className);
+            if (classes.containsKey(className)) {
+                return classes.get(className);
             }
-            return loadedClass;
-         } else {
-            return super.findLoadedClass(className);
-         }
-      }
-   }
+            if (byteCache.containsKey(className)) {
+                definePackageForClass(className);
+                byte[] classBytes = byteCache.get(className);
+
+                if (loadedClass == null) {
+                    try {
+                        loadedClass = defineClass(className, classBytes, 0, classBytes.length, this.getClass().getProtectionDomain());
+                    } catch (NoClassDefFoundError | IncompatibleClassChangeError e) {
+                        throw new ClassNotFoundException(className, e);
+                    }
+                }
+                classes.put(className, loadedClass);
+                if (resolve) {
+                    resolveClass(loadedClass);
+                }
+                return loadedClass;
+            } else {
+                return super.findLoadedClass(className);
+            }
+        }
+    }
 }

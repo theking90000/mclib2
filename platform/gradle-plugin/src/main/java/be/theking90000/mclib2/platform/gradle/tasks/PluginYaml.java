@@ -10,19 +10,15 @@ import org.gradle.api.tasks.TaskAction;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.jar.JarFile;
 
 public abstract class PluginYaml extends DefaultTask {
-
-    @InputFiles
-    public abstract ConfigurableFileCollection getClasspath();
-
-    @OutputFile
-    public abstract RegularFileProperty getOutputFile();
 
     private final Yaml yaml;
 
@@ -33,6 +29,12 @@ public abstract class PluginYaml extends DefaultTask {
         this.yaml = new Yaml(options);
     }
 
+    @InputFiles
+    public abstract ConfigurableFileCollection getClasspath();
+
+    @OutputFile
+    public abstract RegularFileProperty getOutputFile();
+
     @TaskAction
     public void generate() throws Exception {
         Map<Object, Object> values = new HashMap<>();
@@ -40,19 +42,19 @@ public abstract class PluginYaml extends DefaultTask {
             values.putAll(pluginFile(file));
         }
 
-        if(!values.containsValue("version")) {
+        if (!values.containsValue("version")) {
             values.put("version", getProject().getVersion().toString());
         }
 
         File file = getOutputFile().get().getAsFile();
         file.getParentFile().mkdirs();
         try (FileWriter w = new FileWriter(file)) {
-           yaml.dump(values, w);
+            yaml.dump(values, w);
         }
     }
 
     private Map<Object, Object> pluginFile(File file) throws IOException {
-        try(InputStream in = FileUtils.getFileFromJarOrDirectory(file, "plugin.yml")) {
+        try (InputStream in = FileUtils.getFileFromJarOrDirectory(file, "plugin.yml")) {
             if (in != null) {
                 return yaml.load(in);
             }

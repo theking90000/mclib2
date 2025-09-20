@@ -112,12 +112,11 @@ public final class PlatformBoot {
     }
 
 
-
     /**
      * Informs the platform boot system that all plugins have been registered.
      * This allows it to finalize loading, such as resolving shared dependencies and booting plugins.
      *
-     * @param rootCl     the root classloader to use for shared dependencies (usually the platform adapter's classloader)
+     * @param rootCl the root classloader to use for shared dependencies (usually the platform adapter's classloader)
      * @return the total number of dependencies loaded during this finalization (excluding already loaded ones).
      */
     public static int boot(ClassLoader rootCl) {
@@ -139,7 +138,7 @@ public final class PlatformBoot {
     /**
      * Shuts down all registered plugins and closes all resources.
      *
-     * @param rootCl     the root classloader to use for shared dependencies (usually the platform adapter's classloader)
+     * @param rootCl the root classloader to use for shared dependencies (usually the platform adapter's classloader)
      * @return the total number of dependencies unloaded (if any, usually 0)
      */
     public static int shutdown(ClassLoader rootCl) {

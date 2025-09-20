@@ -12,7 +12,7 @@ public class TestPlugin {
     @Test
     public void testLoadPlugin() throws Exception {
         String pp = System.getProperty("java.class.path");
-        String[] p = pp.split(pp.contains(";")? ";":":");
+        String[] p = pp.split(pp.contains(";") ? ";" : ":");
 
         URL[] urls = new URL[p.length];
         for (int i = 0; i < p.length; i++) {

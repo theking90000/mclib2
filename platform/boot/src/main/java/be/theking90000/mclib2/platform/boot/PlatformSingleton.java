@@ -2,7 +2,6 @@ package be.theking90000.mclib2.platform.boot;
 
 import be.theking90000.mclib2.platform.PluginDescriptor;
 
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 
 /**

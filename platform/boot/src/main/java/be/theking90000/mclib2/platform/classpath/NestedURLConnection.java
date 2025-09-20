@@ -46,12 +46,7 @@ the project website at the project page on https://sourceforge.net/projects/mdiu
  */
 package be.theking90000.mclib2.platform.classpath;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -67,142 +62,142 @@ import java.util.jar.JarInputStream;
  * @since 1.2.22
  */
 class NestedURLConnection extends URLConnection implements AutoCloseable {
-   private URL jarFileURL;
-   private String entryName;
-   private String subEntryName;
-   private String file;
-   private ByteArrayOutputStream entryOutputStream;
-   private ByteArrayOutputStream subEntryOutputStream;
+    private URL jarFileURL;
+    private String entryName;
+    private String subEntryName;
+    private String file;
+    private ByteArrayOutputStream entryOutputStream;
+    private ByteArrayOutputStream subEntryOutputStream;
 
-   /**
-    * Constructs a URL connection to the specified URL. A connection to the object referenced by the URL is not created.
-    *
-    * @param url the specified URL.
-    */
-   NestedURLConnection(URL url) throws IOException {
-      super(url);
-      parseSpecs(url);
-      connect();
-   }
+    /**
+     * Constructs a URL connection to the specified URL. A connection to the object referenced by the URL is not created.
+     *
+     * @param url the specified URL.
+     */
+    NestedURLConnection(URL url) throws IOException {
+        super(url);
+        parseSpecs(url);
+        connect();
+    }
 
-   /**
-    * Modified from java.net.JarURLConnection
-    *
-    * @param url URL to parse
-    * @throws MalformedURLException
-    */
-   private void parseSpecs(URL url) throws MalformedURLException {
-      String spec = url.getFile();
+    /**
+     * Modified from java.net.JarURLConnection
+     *
+     * @param url URL to parse
+     * @throws MalformedURLException
+     */
+    private void parseSpecs(URL url) throws MalformedURLException {
+        String spec = url.getFile();
 
-      if (spec.startsWith("jar:")) {
-         spec = spec.substring(4, spec.length());
-      }
+        if (spec.startsWith("jar:")) {
+            spec = spec.substring(4, spec.length());
+        }
 
-      int separator = spec.indexOf("!/");
+        int separator = spec.indexOf("!/");
 
-      jarFileURL = new URL(spec.substring(0, separator++));
-      entryName = null;
+        jarFileURL = new URL(spec.substring(0, separator++));
+        entryName = null;
 
-      /* if ! is the last letter of the innerURL, entryName is null */
-      if (++separator != spec.length()) {
-         entryName = spec.substring(separator, spec.length());
-         int subEntrySeparator = entryName.indexOf("!/");
-         if (subEntrySeparator != -1) {
-            subEntryName = entryName.substring(subEntrySeparator + 2, entryName.length());
-            entryName = entryName.substring(0, subEntrySeparator);
-         }
-      }
-   }
-
-   private InputStream getInputStream(ByteArrayOutputStream stream) {
-      byte[] bytes = stream.toByteArray();
-      InputStream inputStream = new ByteArrayInputStream(bytes);
-      return inputStream;
-   }
-
-   @Override
-   public final void connect() throws IOException {
-      file = jarFileURL.getFile();
-      if (entryName != null) {
-         JarFile jarFile = new JarFile(file);
-         int len;
-         byte[] b;
-         try (InputStream is = jarFile.getInputStream(jarFile.getEntry(entryName))) {
-            b = new byte[2048];
-            entryOutputStream = new ByteArrayOutputStream();
-            while ((len = is.read(b)) > 0) {
-               entryOutputStream.write(b, 0, len);
+        /* if ! is the last letter of the innerURL, entryName is null */
+        if (++separator != spec.length()) {
+            entryName = spec.substring(separator, spec.length());
+            int subEntrySeparator = entryName.indexOf("!/");
+            if (subEntrySeparator != -1) {
+                subEntryName = entryName.substring(subEntrySeparator + 2, entryName.length());
+                entryName = entryName.substring(0, subEntrySeparator);
             }
-         }
-         if (subEntryName != null) {
-            try (JarInputStream entryInputStream = new JarInputStream(getInputStream(entryOutputStream))) {
-               JarEntry subEntry;
-               while ((subEntry = entryInputStream.getNextJarEntry()) != null) {
-                  if (subEntry.getName().equals(subEntryName)) {
-                     subEntryOutputStream = new ByteArrayOutputStream();
-                     if (subEntry.isDirectory()) {
-                        try (JarInputStream newEntryInputStream = new JarInputStream(getInputStream(entryOutputStream)); OutputStreamWriter outputStreamWriter = new OutputStreamWriter(subEntryOutputStream)) {
-                           JarEntry _file;
-                           while ((_file = newEntryInputStream.getNextJarEntry()) != null) {
-                              if (_file.getName().startsWith(subEntryName)) {
-                                 Path path;
-                                 if ((path = Paths.get(_file.getName())).getNameCount() - Paths.get(subEntryName).getNameCount() == 1) {
-                                    outputStreamWriter.append(path.getFileName().toString()).append('\n');
-                                 }
-                              }
-                           }
-                        }
-                     } else {
-                        b = new byte[2048];
-                        while ((len = entryInputStream.read(b)) > 0) {
-                           subEntryOutputStream.write(b, 0, len);
-                        }
-                        break;
-                     }
-                  }
-               }
+        }
+    }
+
+    private InputStream getInputStream(ByteArrayOutputStream stream) {
+        byte[] bytes = stream.toByteArray();
+        InputStream inputStream = new ByteArrayInputStream(bytes);
+        return inputStream;
+    }
+
+    @Override
+    public final void connect() throws IOException {
+        file = jarFileURL.getFile();
+        if (entryName != null) {
+            JarFile jarFile = new JarFile(file);
+            int len;
+            byte[] b;
+            try (InputStream is = jarFile.getInputStream(jarFile.getEntry(entryName))) {
+                b = new byte[2048];
+                entryOutputStream = new ByteArrayOutputStream();
+                while ((len = is.read(b)) > 0) {
+                    entryOutputStream.write(b, 0, len);
+                }
             }
+            if (subEntryName != null) {
+                try (JarInputStream entryInputStream = new JarInputStream(getInputStream(entryOutputStream))) {
+                    JarEntry subEntry;
+                    while ((subEntry = entryInputStream.getNextJarEntry()) != null) {
+                        if (subEntry.getName().equals(subEntryName)) {
+                            subEntryOutputStream = new ByteArrayOutputStream();
+                            if (subEntry.isDirectory()) {
+                                try (JarInputStream newEntryInputStream = new JarInputStream(getInputStream(entryOutputStream)); OutputStreamWriter outputStreamWriter = new OutputStreamWriter(subEntryOutputStream)) {
+                                    JarEntry _file;
+                                    while ((_file = newEntryInputStream.getNextJarEntry()) != null) {
+                                        if (_file.getName().startsWith(subEntryName)) {
+                                            Path path;
+                                            if ((path = Paths.get(_file.getName())).getNameCount() - Paths.get(subEntryName).getNameCount() == 1) {
+                                                outputStreamWriter.append(path.getFileName().toString()).append('\n');
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                b = new byte[2048];
+                                while ((len = entryInputStream.read(b)) > 0) {
+                                    subEntryOutputStream.write(b, 0, len);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+                entryOutputStream.reset();
+                entryOutputStream.close();
+                entryOutputStream = null;
+            }
+        }
+        connected = true;
+    }
+
+    @Override
+    public InputStream getInputStream() throws IOException {
+        if (!connected) {
+            connect();
+        }
+        if (subEntryName != null) {
+            if (subEntryOutputStream != null) {
+                return getInputStream(subEntryOutputStream);
+            } else {
+                throw new IOException("Failed to load " + subEntryName);
+            }
+        } else if (entryName != null) {
+            if (entryOutputStream != null) {
+                return getInputStream(entryOutputStream);
+            } else {
+                throw new IOException("Failed to load " + entryName);
+            }
+        } else {
+            return new JarInputStream(new FileInputStream(file));
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (subEntryOutputStream != null) {
+            subEntryOutputStream.reset();
+            subEntryOutputStream.close();
+            subEntryOutputStream = null;
+        }
+        if (entryOutputStream != null) {
             entryOutputStream.reset();
             entryOutputStream.close();
             entryOutputStream = null;
-         }
-      }
-      connected = true;
-   }
-
-   @Override
-   public InputStream getInputStream() throws IOException {
-      if (!connected) {
-         connect();
-      }
-      if (subEntryName != null) {
-         if (subEntryOutputStream != null) {
-            return getInputStream(subEntryOutputStream);
-         } else {
-            throw new IOException("Failed to load " + subEntryName);
-         }
-      } else if (entryName != null) {
-         if (entryOutputStream != null) {
-            return getInputStream(entryOutputStream);
-         } else {
-            throw new IOException("Failed to load " + entryName);
-         }
-      } else {
-         return new JarInputStream(new FileInputStream(file));
-      }
-   }
-
-   @Override
-   public void close() throws IOException {
-      if (subEntryOutputStream != null) {
-         subEntryOutputStream.reset();
-         subEntryOutputStream.close();
-         subEntryOutputStream = null;
-      }
-      if (entryOutputStream != null) {
-         entryOutputStream.reset();
-         entryOutputStream.close();
-         entryOutputStream = null;
-      }
-   }
+        }
+    }
 }

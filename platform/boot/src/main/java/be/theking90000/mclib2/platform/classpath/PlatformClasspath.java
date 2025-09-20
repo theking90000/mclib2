@@ -1,6 +1,5 @@
 package be.theking90000.mclib2.platform.classpath;
 
-import be.theking90000.mclib2.platform.PluginDescriptor;
 import be.theking90000.mclib2.platform.RegisteredPlugin;
 
 import java.util.*;

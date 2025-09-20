@@ -30,7 +30,7 @@ public class DependencyResolver {
                 String[] pNames = parts[1].split("-");
                 dependency = parts[0] + ':' + pNames[pNames.length - 1];
             }
-         }
+        }
 
         return project.getDependencies().create(dependency + ":" + getVersion());
     }

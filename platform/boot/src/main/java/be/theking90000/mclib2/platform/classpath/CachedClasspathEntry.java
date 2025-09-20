@@ -29,12 +29,12 @@ public class CachedClasspathEntry extends ClasspathEntry {
     }
 
     public Path cachedFile() {
-        return Paths.get(CACHE_DIR, getGlobalID()+"-"+getUniqueID()+".jar");
+        return Paths.get(CACHE_DIR, getGlobalID() + "-" + getUniqueID() + ".jar");
     }
 
     @Override
     public URL resolve(ClassLoader requestBy) throws Exception {
-        if(check()) {
+        if (check()) {
             return cachedFile().toUri().toURL();
         }
 
