@@ -42,6 +42,17 @@ subprojects {
                     version = project.version
                 }
             }
+
+            repositories {
+                maven {
+                    name "theking90000mclib"
+                    url "https://repo.theking90000.be/mclib"
+                    credentials {
+                        username = "$theking90000RepoUser"
+                        password = "$theking90000RepoPassword"
+                    }
+                }
+            }
         }
 
     }
