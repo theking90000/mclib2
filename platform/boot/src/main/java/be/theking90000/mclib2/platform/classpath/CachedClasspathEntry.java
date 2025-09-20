@@ -29,7 +29,7 @@ public class CachedClasspathEntry extends ClasspathEntry {
     }
 
     public Path cachedFile() {
-        return Paths.get(CACHE_DIR, getGlobalID() + "-" + getUniqueID() + ".jar");
+        return Paths.get(CACHE_DIR, getGlobalID().replaceAll(":", ".") + "-" + getUniqueID() + ".jar");
     }
 
     @Override

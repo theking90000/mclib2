@@ -34,10 +34,10 @@ public class TestPlugin {
     }
 
     private PlatformRegistry getRegistry(Class<?> singletonClass) throws Exception {
-        Method m = singletonClass.getDeclaredMethod("getRegistry");
+        Method m = singletonClass.getDeclaredMethod("getRegistry", ClassLoader.class);
         m.setAccessible(true);
         // Not sure this cast will work
-        return (PlatformRegistry) m.invoke(null);
+        return (PlatformRegistry) m.invoke(null, ClassLoader.getSystemClassLoader());
     }
 
 }

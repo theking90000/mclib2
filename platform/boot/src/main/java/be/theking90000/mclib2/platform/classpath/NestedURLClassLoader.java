@@ -67,15 +67,15 @@ public class NestedURLClassLoader extends URLClassLoader implements ClasspathApp
     private Set<String> filteredPackages = null;
     private boolean excludingFilter = true;
 
+    private final ClassLoader parentCopy;
+
     /**
      * Constructs a new NestedURLClassLoader for the specified URLs using the default delegation parent ClassLoader.
      *
      * @param urls the URLs from which to load classes and resources
      */
     public NestedURLClassLoader(URL[] urls) {
-        super(urls);
-        setContextClassLoaderImpl();
-        addURLs(urls);
+        this(urls, null);
     }
 
     /**
@@ -88,6 +88,7 @@ public class NestedURLClassLoader extends URLClassLoader implements ClasspathApp
         super(urls, parent);
         setContextClassLoaderImpl();
         addURLs(urls);
+        this.parentCopy = parent;
     }
 
     @Override
@@ -173,7 +174,7 @@ public class NestedURLClassLoader extends URLClassLoader implements ClasspathApp
             throw new IllegalStateException("Cannot add classes directly");
         } else {
             try {
-                addDirectory(new File(url.toURI()));
+                addDirectory(new File(url.toURI()), null);
             } catch (URISyntaxException e) {
                 throw new IllegalStateException(e);
             }
@@ -181,9 +182,9 @@ public class NestedURLClassLoader extends URLClassLoader implements ClasspathApp
     }
 
     // Begin Modified
-    private void addFile(File file, File directory) throws IOException {
+    private void addFile(File file, File directory, String relativePath) throws IOException {
         if (file.isDirectory()) {
-            addDirectory(file);
+            addDirectory(file, relativePath);
         } else if (file.getName().endsWith(".jar")) {
             try {
                 super.addURL(file.toURI().toURL());
@@ -192,7 +193,7 @@ public class NestedURLClassLoader extends URLClassLoader implements ClasspathApp
             }
         } else if (directory != null) {
             try {
-                String relativeName = directory.toURI().relativize(file.toURI()).getPath();
+                String relativeName = relativePath + directory.toURI().relativize(file.toURI()).getPath();
                 try (FileInputStream fileInputStream = new FileInputStream(file)) {
                     addClassFromInputStream(fileInputStream, relativeName);
                     addURLToResource(relativeName, file.toURI().toURL());
@@ -203,9 +204,9 @@ public class NestedURLClassLoader extends URLClassLoader implements ClasspathApp
         }
     } // End Modified
 
-    private void addDirectory(File directory) throws IOException {
+    private void addDirectory(File directory, String relativePath) throws IOException {
         if (!directory.isDirectory()) {
-            addFile(directory, null);
+            addFile(directory, null, relativePath);
             return;
             // throw new IllegalStateException("Not a directory: " + directory);
         }
@@ -214,7 +215,7 @@ public class NestedURLClassLoader extends URLClassLoader implements ClasspathApp
             throw new IllegalStateException("No files found in " + directory);
         }
         for (File file : files) {
-            addFile(file, directory);
+            addFile(file, directory, relativePath == null? "": relativePath + directory.getName() + "/");
         }
     }
 
@@ -286,7 +287,13 @@ public class NestedURLClassLoader extends URLClassLoader implements ClasspathApp
                     // class is not found in the given urls.
                     // Let's try it in parent classloader.
                     // If class is still not found, then this method will throw class not found ex.
-                    loadedClass = super.loadClass(name, resolve);
+                    try {
+                        loadedClass = parentCopy.loadClass(name);
+                    } catch (NullPointerException | ClassNotFoundException e2) {
+                        loadedClass = super.loadClass(name, resolve);
+                    }
+
+
                 }
             }
 
