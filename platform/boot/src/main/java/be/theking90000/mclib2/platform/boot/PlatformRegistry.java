@@ -39,7 +39,7 @@ public class PlatformRegistry {
      * @param callerClassLoader the classloader of the caller
      * @return the number of dependencies loaded (excluding already loaded ones)
      */
-    public  <T> int register(PluginDescriptor descriptor, T customData, ClassLoader callerClassLoader) {
+    public <T> int register(PluginDescriptor descriptor, T customData, ClassLoader callerClassLoader) {
         RegisteredPlugin<T> r = new RegisteredPlugin<>(descriptor, customData, platformClasspath.createPluginLoader(), callerClassLoader);
         this.registeredPlugins.put(descriptor, r);
 
@@ -134,20 +134,27 @@ public class PlatformRegistry {
             try {
                 Class<?> cls = Class.forName(entrypoint, true, r.classLoader);
 
-                for (Constructor<?> c : cls.getDeclaredConstructors()) {
-                    if (c.isAnnotationPresent(PlatformEntrypoint.class)) {
-                        if (c.getParameterCount() == 0) {
-                            c.setAccessible(true);
-                            c.newInstance();
-                            break;
-                        } else if (c.getParameterCount() == 1 && r.customData != null && c.getParameterTypes()[0].isAssignableFrom(r.customData.getClass())) {
-                            c.setAccessible(true);
-                            c.newInstance(r.customData);
-                            break;
+                try {
+                    for (Constructor<?> c : cls.getDeclaredConstructors()) {
+                        if (c.isAnnotationPresent(PlatformEntrypoint.class)) {
+                            if (c.getParameterCount() == 0) {
+                                c.setAccessible(true);
+                                c.newInstance();
+                                break;
+                            } else if (c.getParameterCount() == 1 && r.customData != null && c.getParameterTypes()[0].isAssignableFrom(r.customData.getClass())) {
+                                c.setAccessible(true);
+                                c.newInstance(r.customData);
+                                break;
+                            }
                         }
                     }
+                } catch (Throwable exp) {
+                    if (exp instanceof NoClassDefFoundError) {
+                        continue;
+                    }
+                    throw exp;
                 }
-            } catch (ReflectiveOperationException e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Failed to load entrypoint " + entrypoint, e);
             }
         }

@@ -11,7 +11,6 @@ public class TestEntrypoint {
 
     @PlatformEntrypoint
     public TestEntrypoint() {
-        System.out.println("TestEntrypoint initialized");
         logger.info( "TestEntrypoint initialized");
     }
 }
