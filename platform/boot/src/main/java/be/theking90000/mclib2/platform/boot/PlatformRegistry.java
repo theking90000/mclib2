@@ -1,15 +1,10 @@
 package be.theking90000.mclib2.platform.boot;
 
-import be.theking90000.mclib2.platform.PlatformEntrypoint;
-import be.theking90000.mclib2.platform.PluginDescriptor;
-import be.theking90000.mclib2.platform.RegisteredPlugin;
+import be.theking90000.mclib2.platform.*;
 import be.theking90000.mclib2.platform.classpath.PlatformClasspath;
 
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class PlatformRegistry {
 
@@ -130,6 +125,15 @@ public class PlatformRegistry {
     private void callEntrypoints(RegisteredPlugin<?> r) {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(r.classLoader);
+        PriorityQueue<Constructor<?>> entrypoints = new PriorityQueue<>((a, b) -> {
+            EntrypointPriority pa = a.getAnnotation(EntrypointPriority.class);
+            EntrypointPriority pb = b.getAnnotation(EntrypointPriority.class);
+
+            int va = pa == null ? Priority.NORMAL.ordinal() : pa.value().ordinal();
+            int vb = pb == null ? Priority.NORMAL.ordinal() : pb.value().ordinal();
+
+            return Integer.compare(vb, va);
+        });
         for (String entrypoint : r.descriptor.entryPoints) {
             try {
                 Class<?> cls = Class.forName(entrypoint, true, r.classLoader);
@@ -137,15 +141,7 @@ public class PlatformRegistry {
                 try {
                     for (Constructor<?> c : cls.getDeclaredConstructors()) {
                         if (c.isAnnotationPresent(PlatformEntrypoint.class)) {
-                            if (c.getParameterCount() == 0) {
-                                c.setAccessible(true);
-                                c.newInstance();
-                                break;
-                            } else if (c.getParameterCount() == 1 && r.customData != null && c.getParameterTypes()[0].isAssignableFrom(r.customData.getClass())) {
-                                c.setAccessible(true);
-                                c.newInstance(r.customData);
-                                break;
-                            }
+                            entrypoints.add(c);
                         }
                     }
                 } catch (Throwable exp) {
@@ -158,6 +154,25 @@ public class PlatformRegistry {
                 throw new RuntimeException("Failed to load entrypoint " + entrypoint, e);
             }
         }
+
+        PlatformStore.enter();
+
+        while (!entrypoints.isEmpty()) {
+            Constructor<?> c = entrypoints.poll();
+            try {
+                if (c.getParameterCount() == 0) {
+                    c.setAccessible(true);
+                    c.newInstance();
+                } else if (c.getParameterCount() == 1 && r.customData != null && c.getParameterTypes()[0].isAssignableFrom(r.customData.getClass())) {
+                    c.setAccessible(true);
+                    c.newInstance(r.customData);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to call entrypoint " + c.getDeclaringClass().getName(), e);
+            }
+        }
+
+        PlatformStore.exit();
         Thread.currentThread().setContextClassLoader(cl);
     }
 

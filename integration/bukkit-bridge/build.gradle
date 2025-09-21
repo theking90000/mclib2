@@ -6,7 +6,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly project(':platform:boot')
+    compileOnly project(':platform:boot-api')
 
     implementation project(":integration:bukkit-api")
     implementation project(':core:runtime')

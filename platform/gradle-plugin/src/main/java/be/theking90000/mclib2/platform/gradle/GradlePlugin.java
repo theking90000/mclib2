@@ -29,7 +29,7 @@ public class GradlePlugin implements Plugin<Project> {
     };
 
     private static final String[] BOOTSTRAP = new String[]{
-            "be.theking90000.mclib2:platform-boot",
+            "be.theking90000.mclib2:platform-boot-api",
     };
 
     public static String getVersion() {
@@ -53,10 +53,10 @@ public class GradlePlugin implements Plugin<Project> {
                 target.getDependencies().add("implementation", dRes.resolve("be.theking90000.mclib2:integration-bukkit-bridge", "be.theking90000.mclib2:bukkit-bridge"));
                 target.getDependencies().add("annotationProcessor", dRes.resolve("be.theking90000.mclib2:core-annotation-system-processor", "be.theking90000.mclib2:processor"));
             }
-            for (String s : BOOTSTRAP) {
+            //for (String s : BOOTSTRAP) {
                 // Unsure about it, maybe add only annotation @PlatformEntrypoint as compileOnly?
-                target.getDependencies().add("compileOnly", dRes.resolve(s));
-            }
+                target.getDependencies().add("compileOnly", dRes.resolve("be.theking90000.mclib2:platform-boot-api", "be.theking90000.mclib2:boot-api"));
+            //}
         });
 
         Configuration runtime = createConfiguration(target, "MCLib2Runtime");

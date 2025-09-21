@@ -9,6 +9,7 @@ include(
         "core:annotation-system:processor",
         "core:runtime",
         "platform:boot",
+        "platform:boot-api",
         "platform:gradle-plugin",
         "platform:standalone-adapter",
         "platform:bukkit-adapter",
