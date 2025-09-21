@@ -1,1 +1,2 @@
-be.theking90000.mclib2.integration.CommonEntrypoint
+be.theking90000.mclib2.integration.guice.GuiceModuleEntrypoint
+be.theking90000.mclib2.integration.guice.GuiceInjectorEntrypoint

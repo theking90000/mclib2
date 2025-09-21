@@ -1,6 +1,7 @@
 package be.theking90000.mclib2.integration.bukkit;
 
 import be.theking90000.mclib2.platform.PlatformEntrypoint;
+import be.theking90000.mclib2.platform.PlatformStore;
 import be.theking90000.mclib2.runtime.AnnotationBootstrap;
 import be.theking90000.mclib2.runtime.AnnotationDiscovery;
 import com.google.inject.Module;
@@ -9,11 +10,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BukkitEntrypoint {
+public class BukkitGuiceModuleEntrypoint {
 
     @PlatformEntrypoint
-    public BukkitEntrypoint(JavaPlugin plugin) {
-        Set<Module> modules = new HashSet<>();
+    public BukkitGuiceModuleEntrypoint(JavaPlugin plugin) {
+        Set<Module> modules = PlatformStore.computeIfAbsent("guiceModules", HashSet::new);
 
         plugin.getLogger().info("Hello From BukkitEntrypoint>2 !");
 

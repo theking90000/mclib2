@@ -1,1 +1,1 @@
-be.theking90000.mclib2.integration.bukkit.BukkitEntrypoint
+be.theking90000.mclib2.integration.bukkit.BukkitGuiceModuleEntrypoint

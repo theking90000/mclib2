@@ -125,15 +125,8 @@ public class PlatformRegistry {
     private void callEntrypoints(RegisteredPlugin<?> r) {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(r.classLoader);
-        PriorityQueue<Constructor<?>> entrypoints = new PriorityQueue<>((a, b) -> {
-            EntrypointPriority pa = a.getAnnotation(EntrypointPriority.class);
-            EntrypointPriority pb = b.getAnnotation(EntrypointPriority.class);
+        List<Constructor<?>> entrypoints = new ArrayList<>();
 
-            int va = pa == null ? Priority.NORMAL.ordinal() : pa.value().ordinal();
-            int vb = pb == null ? Priority.NORMAL.ordinal() : pb.value().ordinal();
-
-            return Integer.compare(vb, va);
-        });
         for (String entrypoint : r.descriptor.entryPoints) {
             try {
                 Class<?> cls = Class.forName(entrypoint, true, r.classLoader);
@@ -155,10 +148,15 @@ public class PlatformRegistry {
             }
         }
 
+        entrypoints.sort(Comparator.comparingInt((a) -> {
+            EntrypointPriority pa = a.getAnnotation(EntrypointPriority.class);
+
+            return pa == null ? Priority.NORMAL.ordinal() : pa.value().ordinal();
+        }));
+
         PlatformStore.enter();
 
-        while (!entrypoints.isEmpty()) {
-            Constructor<?> c = entrypoints.poll();
+        for (Constructor<?> c : entrypoints) {
             try {
                 if (c.getParameterCount() == 0) {
                     c.setAccessible(true);

@@ -1,4 +1,4 @@
-package be.theking90000.mclib2.integration;
+package be.theking90000.mclib2.integration.guice;
 
 import be.theking90000.mclib2.runtime.AbstractAnnotationHandlerFactory;
 import be.theking90000.mclib2.runtime.AnnotationHandler;

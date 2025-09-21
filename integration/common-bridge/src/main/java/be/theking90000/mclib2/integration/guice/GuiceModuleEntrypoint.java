@@ -1,6 +1,7 @@
-package be.theking90000.mclib2.integration;
+package be.theking90000.mclib2.integration.guice;
 
 import be.theking90000.mclib2.platform.PlatformEntrypoint;
+import be.theking90000.mclib2.platform.PlatformStore;
 import be.theking90000.mclib2.runtime.AnnotationBootstrap;
 import be.theking90000.mclib2.runtime.AnnotationDiscovery;
 import com.google.inject.Module;
@@ -8,11 +9,11 @@ import com.google.inject.Module;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CommonEntrypoint {
+public class GuiceModuleEntrypoint {
 
     @PlatformEntrypoint
-    public CommonEntrypoint() {
-        Set<Module> modules = new HashSet <>();
+    public GuiceModuleEntrypoint() {
+        Set<Module> modules = PlatformStore.computeIfAbsent("guiceModules", HashSet::new);
 
         AnnotationDiscovery ad = new AnnotationDiscovery();
         AnnotationDiscovery.AnnotationResult ar = ad.discover();
