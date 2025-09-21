@@ -5,7 +5,7 @@ plugins {
 gradlePlugin {
     plugins {
         mclib2 {
-            id = 'mclib2-plugin'
+            id = 'be.theking90000.mclib2-plugin'
             implementationClass = 'be.theking90000.mclib2.platform.gradle.GradlePlugin'
         }
     }
