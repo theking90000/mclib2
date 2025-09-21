@@ -18,8 +18,7 @@ public class BukkitGuiceModuleEntrypoint {
 
         plugin.getLogger().info("Hello From BukkitEntrypoint>2 !");
 
-        AnnotationDiscovery ad = new AnnotationDiscovery();
-        AnnotationDiscovery.AnnotationResult ar = ad.discover();
+        AnnotationDiscovery.AnnotationResult ar = PlatformStore.computeIfAbsent("annotationResult", () -> new AnnotationDiscovery().discover());
 
         plugin.getLogger().info("Discovery = " + ar.getDiscoveredAnnotations().size());
         AnnotationBootstrap bs = new AnnotationBootstrap(

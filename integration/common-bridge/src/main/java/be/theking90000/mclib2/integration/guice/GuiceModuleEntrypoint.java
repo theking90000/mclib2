@@ -15,8 +15,7 @@ public class GuiceModuleEntrypoint {
     public GuiceModuleEntrypoint() {
         Set<Module> modules = PlatformStore.computeIfAbsent("guiceModules", HashSet::new);
 
-        AnnotationDiscovery ad = new AnnotationDiscovery();
-        AnnotationDiscovery.AnnotationResult ar = ad.discover();
+        AnnotationDiscovery.AnnotationResult ar = PlatformStore.computeIfAbsent("annotationResult", () -> new AnnotationDiscovery().discover());
 
         AnnotationBootstrap bs = new AnnotationBootstrap(
                 new GuiceModuleAnnotationHandlerFactory(modules)
@@ -25,10 +24,6 @@ public class GuiceModuleEntrypoint {
         bs.bootstrap(ar);
 
         System.out.println("Modules = " + modules.size());
-
-        // TODO: find a way to share information accross PlatformEntrypoints?
-        // Maybe Using a static Magic class and Thread.currentThread().getContextClassLoader() to define each plugin.
-        // Guice.createInjector(modules);
     }
 
 }
