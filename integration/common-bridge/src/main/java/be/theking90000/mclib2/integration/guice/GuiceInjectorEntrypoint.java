@@ -13,7 +13,7 @@ import java.util.Set;
 public class GuiceInjectorEntrypoint {
 
     @PlatformEntrypoint
-    @EntrypointPriority(Priority.LAST)
+    @EntrypointPriority(Priority.HIGH)
     public GuiceInjectorEntrypoint() {
         Set<Module> modules = PlatformStore.get("guiceModules");
 
@@ -21,6 +21,8 @@ public class GuiceInjectorEntrypoint {
         Injector injector = Guice.createInjector(modules);
 
         System.out.println("Injector created" + injector);
+
+        PlatformStore.put("guiceInjector", injector);
     }
 
 }

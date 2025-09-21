@@ -1,4 +1,4 @@
-package be.theking90000.mclib2.integration.bukkit;
+package be.theking90000.mclib2.integration.bukkit.guice;
 
 
 import be.theking90000.mclib2.runtime.AbstractAnnotationHandlerFactory;
