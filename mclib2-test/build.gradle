@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'mclib2-plugin'
+    id 'be.theking90000.mclib2-plugin'
 }
 
 group = 'be.theking90000.mclib2'

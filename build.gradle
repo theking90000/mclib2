@@ -5,7 +5,7 @@ plugins {
 
 allprojects {
     group = "be.theking90000.mclib2"
-    version = "0.0.1"
+    version = "0.0.2-SNAPSHOT"
 
     repositories {
         mavenCentral()
@@ -45,8 +45,10 @@ subprojects {
 
             repositories {
                 maven {
-                    name "theking90000mclib"
-                    url "https://repo.theking90000.be/mclib"
+                    name "theking90000Repo"
+                    url = uri(version.endsWith("SNAPSHOT") ?
+                                    "https://repo.theking90000.be/snapshots" :
+                                    "https://repo.theking90000.be/releases")
                     credentials {
                         username = "$theking90000RepoUser"
                         password = "$theking90000RepoPassword"
