@@ -4,12 +4,16 @@ import be.theking90000.mclib2.platform.*;
 import be.theking90000.mclib2.platform.classpath.PlatformClasspath;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.*;
 
 public class PlatformRegistry {
 
     private final Map<PluginDescriptor, RegisteredPlugin<?>> registeredPlugins = new HashMap<>();
     private final Set<RegisteredPlugin<?>> bootedPlugins = new HashSet<>();
+
+    private final Map<RegisteredPlugin<?>, Set<Object>> initializedEntrypoints = new HashMap<>();
+
     private PlatformClasspath platformClasspath;
 
     public PlatformRegistry() {
@@ -118,6 +122,8 @@ public class PlatformRegistry {
 
         this.platformClasspath.unregisterDependencies(r);
 
+        this.callDestroy(r);
+
         return unloaded;
     }
 
@@ -156,22 +162,51 @@ public class PlatformRegistry {
 
         PlatformStore.enter();
 
+        HashSet<Object> entrypointInstances = new HashSet<>();
+
         for (Constructor<?> c : entrypoints) {
             try {
+                Object o;
                 if (c.getParameterCount() == 0) {
                     c.setAccessible(true);
-                    c.newInstance();
+                    o = c.newInstance();
                 } else if (c.getParameterCount() == 1 && r.customData != null && c.getParameterTypes()[0].isAssignableFrom(r.customData.getClass())) {
                     c.setAccessible(true);
-                    c.newInstance(r.customData);
+                    o = c.newInstance(r.customData);
+                } else {
+                    continue;
                 }
+                entrypointInstances.add(o);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to call entrypoint " + c.getDeclaringClass().getName(), e);
             }
         }
 
+        this.initializedEntrypoints.put(r, entrypointInstances);
+
         PlatformStore.exit();
         Thread.currentThread().setContextClassLoader(cl);
+    }
+
+    private void callDestroy(RegisteredPlugin<?> r) {
+        if (!this.initializedEntrypoints.containsKey(r)) {
+            return;
+        }
+
+        for (Object o : this.initializedEntrypoints.get(r)) {
+            try {
+                for (Method m : o.getClass().getDeclaredMethods()) {
+                    if (m.isAnnotationPresent(PlatformDestroy.class)) {
+                        m.setAccessible(true);
+                        m.invoke(o);
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to call onDisable() on " + o.getClass().getName(), e);
+            }
+        }
+
+        this.initializedEntrypoints.clear();
     }
 
 
