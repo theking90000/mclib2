@@ -1,0 +1,9 @@
+
+dependencies {
+    compileOnly project(':platform:boot')
+    compileOnly project(':core:annotation-system:api')
+
+    implementation project(':integration:common-api')
+    implementation project(':core:runtime')
+    annotationProcessor project(":core:annotation-system:processor")
+}

@@ -48,6 +48,9 @@ public class GradlePlugin implements Plugin<Project> {
                 for (String s : FRAMEWORK_IMPLEMENTATION) {
                     target.getDependencies().add("implementation", dRes.resolve(s));
                 }
+
+                target.getDependencies().add("implementation", dRes.resolve("be.theking90000.mclib2:integration-bukkit-api", "be.theking90000.mclib2:bukkit-api"));
+                target.getDependencies().add("implementation", dRes.resolve("be.theking90000.mclib2:integration-bukkit-bridge", "be.theking90000.mclib2:bukkit-bridge"));
             }
             for (String s : BOOTSTRAP) {
                 // Unsure about it, maybe add only annotation @PlatformEntrypoint as compileOnly?
@@ -217,7 +220,6 @@ public class GradlePlugin implements Plugin<Project> {
                     task.getOutputFile().set(target.getLayout().getBuildDirectory().file("generated/plugin.yml"));
                 });
 
-
         TaskProvider<Jar> bukkitJar = target.getTasks().register("bukkitJar", Jar.class, jar -> {
             jar.setGroup("mclib2");
 
@@ -225,6 +227,7 @@ public class GradlePlugin implements Plugin<Project> {
             jar.dependsOn(pluginYaml);
 
             jar.getArchiveBaseName().set(target.getName() + "-bukkit");
+
 
 
             jar.dependsOn(renameTask);

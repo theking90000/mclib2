@@ -1,0 +1,17 @@
+repositories {
+    maven {
+        name = "spigotmc"
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+}
+
+dependencies {
+    compileOnly project(':platform:boot')
+
+    implementation project(":integration:bukkit-api")
+    implementation project(':core:runtime')
+    implementation project(':integration:common-bridge')
+    annotationProcessor project(":core:annotation-system:processor")
+
+    compileOnly 'org.bukkit:bukkit:1.8.8-R0.1-SNAPSHOT'
+}

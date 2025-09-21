@@ -1,0 +1,6 @@
+
+dependencies {
+    api project(":core:annotation-system:api")
+    api project(":integration:common-api")
+    annotationProcessor project(":core:annotation-system:processor")
+}
