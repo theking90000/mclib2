@@ -128,7 +128,8 @@ public class PlatformRegistry {
 
 
     private void callEntrypoints(RegisteredPlugin<?> r) {
-        // Thread.currentThread().setContextClassLoader(r.classLoader);
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(r.classLoader);
         for (String entrypoint : r.descriptor.entryPoints) {
             try {
                 Class<?> cls = Class.forName(entrypoint, true, r.classLoader);
@@ -157,6 +158,7 @@ public class PlatformRegistry {
                 throw new RuntimeException("Failed to load entrypoint " + entrypoint, e);
             }
         }
+        Thread.currentThread().setContextClassLoader(cl);
     }
 
 

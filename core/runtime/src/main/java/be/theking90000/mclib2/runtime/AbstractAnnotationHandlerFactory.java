@@ -27,9 +27,8 @@ public abstract class AbstractAnnotationHandlerFactory implements AnnotationHand
      * @return true if this factory can instantiate handlers requiring the given factory, false otherwise
      */
     protected boolean isFactory(Class<? extends AnnotationHandlerFactory> clazz) {
-        if (clazz == null) return false;
-
-        return clazz.isAssignableFrom(this.getClass());
+        // if (clazz == null) return false;
+        return clazz == this.getClass();
     }
 
     private Class<? extends AnnotationHandlerFactory> getInjectStrategy(Class<?> clazz) {

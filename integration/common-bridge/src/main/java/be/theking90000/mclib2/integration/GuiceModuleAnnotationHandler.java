@@ -1,17 +1,29 @@
 package be.theking90000.mclib2.integration;
 
 import be.theking90000.mclib2.annotations.AnnotationLoader;
+import be.theking90000.mclib2.annotations.InjectStrategy;
 import be.theking90000.mclib2.runtime.AnnotationHandler;
+import com.google.inject.Module;
+
+import java.util.Set;
 
 @AnnotationLoader(GuiceModule.class)
-public class GuiceModuleAnnotationHandler implements AnnotationHandler<GuiceModule> {
+@InjectStrategy(GuiceModuleAnnotationHandlerFactory.class)
+public class GuiceModuleAnnotationHandler implements AnnotationHandler<Module> {
 
-    public GuiceModuleAnnotationHandler() {
-        System.out.println("Loaded GuiceModuleAnnotationHandler");
+    private final Set<Module> modules;
+
+    public GuiceModuleAnnotationHandler(Set<Module> modules) {
+        this.modules = modules;
     }
 
     @Override
-    public void handle(Class<? extends GuiceModule> clazz) throws Exception {
-        System.out.println("Loaded GuiceModule: " + clazz.getCanonicalName());
+    public void handle(Class<? extends Module> clazz) throws Exception {
+        try {
+            modules.add(clazz.getDeclaredConstructor().newInstance());
+        } catch (NoSuchMethodException e) {
+            //
+        }
     }
+
 }

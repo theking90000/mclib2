@@ -51,6 +51,7 @@ public class GradlePlugin implements Plugin<Project> {
 
                 target.getDependencies().add("implementation", dRes.resolve("be.theking90000.mclib2:integration-bukkit-api", "be.theking90000.mclib2:bukkit-api"));
                 target.getDependencies().add("implementation", dRes.resolve("be.theking90000.mclib2:integration-bukkit-bridge", "be.theking90000.mclib2:bukkit-bridge"));
+                target.getDependencies().add("annotationProcessor", dRes.resolve("be.theking90000.mclib2:core-annotation-system-processor", "be.theking90000.mclib2:processor"));
             }
             for (String s : BOOTSTRAP) {
                 // Unsure about it, maybe add only annotation @PlatformEntrypoint as compileOnly?

@@ -12,6 +12,7 @@ include(
         "platform:gradle-plugin",
         "platform:standalone-adapter",
         "platform:bukkit-adapter",
+        "integration:injector",
         "integration:common-api",
         "integration:common-bridge",
         "integration:bukkit-bridge",

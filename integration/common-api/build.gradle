@@ -1,4 +1,6 @@
 dependencies {
     compileOnly project(':core:annotation-system:api')
     annotationProcessor project(":core:annotation-system:processor")
+
+    api "com.google.inject:guice:7.0.0"
 }
