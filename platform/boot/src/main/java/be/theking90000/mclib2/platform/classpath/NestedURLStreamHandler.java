@@ -52,9 +52,7 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
 /**
- * An URLStreamHandler used by a {@link NestedURLClassLoader}.
- *
- * @since 1.2.22
+ * An URLStreamHandler used by a {@link DependencyClassLoader}.
  */
 class NestedURLStreamHandler extends URLStreamHandler {
     private NestedURLConnection nestedJarURLConnection;

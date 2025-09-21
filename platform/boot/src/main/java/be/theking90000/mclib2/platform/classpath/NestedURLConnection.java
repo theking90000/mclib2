@@ -57,7 +57,7 @@ import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 
 /**
- * An URLConnection used by a {@link NestedURLClassLoader}.
+ * An URLConnection used by a {@link DependencyClassLoader}.
  *
  * @since 1.2.22
  */

@@ -6,21 +6,20 @@ import java.util.*;
 
 public class PlatformClasspath {
 
-    private final ChildFirstClassLoader platformClassLoader;
+    private final DependencyClassLoader platformClassLoader;
 
     private final Set<String> globalIdsLoaded = new HashSet<>();
-    private final Set<PlatformDependency> globalDependencies = new HashSet<>();
     private final Map<RegisteredPlugin<?>, Set<PlatformDependency>> localDependencies = new HashMap<>();
 
     private final Map<ClasspathEntry, Integer> awaitingDependencies = new HashMap<>();
     private final Map<ClasspathEntry, PlatformDependency> platformDependencies = new HashMap<>();
 
     public PlatformClasspath() {
-        platformClassLoader = new ChildFirstClassLoader(getClass().getClassLoader());
+        platformClassLoader = new DependencyClassLoader(getClass().getClassLoader());
     }
 
-    public ChildFirstClassLoader createPluginLoader() {
-        return new ChildFirstClassLoader(platformClassLoader);
+    public DependencyClassLoader createPluginLoader() {
+        return new DependencyClassLoader(platformClassLoader);
     }
 
 
@@ -83,7 +82,7 @@ public class PlatformClasspath {
         }
 
         localDependencies.clear();
-        globalDependencies.clear();
+        // globalDependencies.clear();
         awaitingDependencies.clear();
         platformDependencies.clear();
 
@@ -108,26 +107,8 @@ public class PlatformClasspath {
 
         if (pDep == null) throw new RuntimeException("Dependency not registered: " + dependency);
 
-        // Already loaded as a global dependency, nothing to do.
-        // Is accessible from "platformClassLoader"
-        if (globalDependencies.contains(pDep)) return false;
+        plugin.classLoader.addDependency(pDep);
 
-        // Check if we have a dependency conflict (same global identifier but different unique ID)
-        // If this is the case, the dependency cannot be loaded as a global dependency.
-        // and must be loaded as a local dependency.
-        if (globalIdsLoaded.contains(dependency.getGlobalID())) {
-            Set<PlatformDependency> localDeps = localDependencies.computeIfAbsent(plugin, (k) -> new HashSet<>());
-            if (localDeps.contains(pDep)) return false;
-
-            pDep.load(plugin.classLoader);
-            localDeps.add(pDep);
-            return true;
-        }
-
-        // Load as a global dependency
-        pDep.load(platformClassLoader);
-        globalDependencies.add(pDep);
-        globalIdsLoaded.add(dependency.getGlobalID());
         return true;
     }
 
@@ -146,13 +127,7 @@ public class PlatformClasspath {
 
             if (pDep == null) throw new RuntimeException("Dependency not registered: " + dependency);
 
-            // Attempt to load the dependency as a global dependency
-            if (!globalDependencies.contains(pDep) && !globalIdsLoaded.contains(dependency.getGlobalID())) {
-                pDep.load(platformClassLoader);
-                globalDependencies.add(pDep);
-                globalIdsLoaded.add(dependency.getGlobalID());
-                loaded++;
-            }
+            platformClassLoader.addDependency(pDep);
 
             // Remove from awaiting dependencies
             awaitingDependencies.remove(dependency);

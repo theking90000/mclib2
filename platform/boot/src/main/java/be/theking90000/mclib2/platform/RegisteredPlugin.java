@@ -1,7 +1,7 @@
 package be.theking90000.mclib2.platform;
 
-import be.theking90000.mclib2.platform.classpath.ChildFirstClassLoader;
 import be.theking90000.mclib2.platform.classpath.ClasspathEntry;
+import be.theking90000.mclib2.platform.classpath.DependencyClassLoader;
 
 import java.util.Objects;
 import java.util.Set;
@@ -13,13 +13,13 @@ public class RegisteredPlugin<T> {
     /**
      * The class loader associated with this plugin by mclib2 platform-boot
      */
-    public final ChildFirstClassLoader classLoader;
+    public final DependencyClassLoader classLoader;
     /**
      * The class loader of the caller that registered this plugin (e.g. Bukkit's plugin classloader)
      */
     public final ClassLoader callerClassLoader;
 
-    public RegisteredPlugin(PluginDescriptor descriptor, T customData, ChildFirstClassLoader classLoader, ClassLoader callerClassLoader) {
+    public RegisteredPlugin(PluginDescriptor descriptor, T customData, DependencyClassLoader classLoader, ClassLoader callerClassLoader) {
         this.descriptor = descriptor;
         this.customData = customData;
 

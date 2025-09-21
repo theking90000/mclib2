@@ -59,7 +59,7 @@ public class TestPluginRegister {
 
         int loaded = PlatformBoot.boot();
 
-        assert loaded == 3;
+        assert loaded == 5;
 
         PlatformBoot.unregister(pd1);
         PlatformBoot.unregister(pd2);
@@ -94,7 +94,7 @@ public class TestPluginRegister {
 
         int loaded = PlatformBoot.boot();
 
-        assert loaded == 5;
+        assert loaded == 9;
 
         // in this context the class loaded is not the one in the test classes but the one in the jar
         // This proves child-first loading works.

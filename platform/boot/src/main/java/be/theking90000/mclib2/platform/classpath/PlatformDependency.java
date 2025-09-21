@@ -1,5 +1,6 @@
 package be.theking90000.mclib2.platform.classpath;
 
+import java.net.URL;
 import java.util.Objects;
 
 public class PlatformDependency {
@@ -8,32 +9,32 @@ public class PlatformDependency {
     private ClassLoader requestedBy;
     private boolean loaded = false;
 
+    private UnpackedDependency unpacked = null;
+
     public PlatformDependency(ClasspathEntry entry, ClassLoader requestedBy) {
         this.entry = entry;
         this.requestedBy = requestedBy;
     }
 
-    /**
-     * Loads the dependency if not already loaded. This method is thread-safe.
-     *
-     * @param classpath The classpath appender to use.
-     * @return true if the dependency was loaded successfully or was already loaded, false otherwise.
-     */
-    public boolean load(ClasspathAppender classpath) {
+    public ClasspathEntry getClasspathEntry() {
+        return entry;
+    }
+
+    protected URL resolve() {
         try {
-            classpath.appendUrlToClasspath(entry.resolve(requestedBy));
-            if (!loaded) {
-                loaded = true;
-                return false;
-            }
-            return true;
+            return entry.resolve(requestedBy);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load dependency: " + entry, e);
+            throw new RuntimeException("Failed to resolve dependency: " + entry, e);
         }
     }
 
-    public ClasspathEntry getClasspathEntry() {
-        return entry;
+    protected UnpackedDependency unpack() {
+        if (unpacked != null) return unpacked;
+        try {
+            return (unpacked = new UnpackedDependency(resolve()));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to unpack dependency: " + entry, e);
+        }
     }
 
     @Override
