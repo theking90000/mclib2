@@ -19,22 +19,25 @@ public class ConfigAnnotationHandler implements AnnotationHandler<Object> {
         this.modules = modules;
     }
 
-
     @Override
+    @SuppressWarnings("unchecked")
     public void handle(Class<?> clazz) throws Exception {
         modules.add(new Module() {
             @Override
             public void configure(Binder binder) {
-                Provider<Object> provider = new Provider<Object>() {
-                    @Inject ConfigLoader loader;
+                Provider<?> p = new ConfigDynamicProvider(clazz);
+                // Intellij IDEA bug?
+                // It says there is two method candidate for provider
+                // And says toProvider(Provider<?>) twice except that one is
+                // com.google.inject.Provider<T> and the other one is
+                // jakarta.inject.Provider<T> but it seems to treat it
+                // as the same method??
 
-                    @Override
-                    public Object get() {
-                        return loader.load(clazz);
-                    }
-                };
+                // Even though intellij says there's an error here
+                // It compiles and works fine
 
-                binder.bind(clazz).toProvider((Provider) provider);
+                // noinspection
+                binder.bind(clazz).toProvider((Provider) p);
             }
         });
     }
