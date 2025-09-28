@@ -1,0 +1,6 @@
+dependencies {
+    api 'com.networknt:json-schema-validator:1.5.9'
+
+    api project(":integration:common-bridge")
+    api project(":integration:config-api")
+}

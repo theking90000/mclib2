@@ -23,6 +23,8 @@ include(
         "integration:config-annotations",
         "integration:config-api",
         "integration:config-processor",
+        "integration:config-bridge",
+        "integration:config-yaml-bridge",
         //"framework:bukkit-integration",
 /*      "integrations:guice",
         "platform:plugin-system",

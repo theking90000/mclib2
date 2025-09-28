@@ -12,4 +12,13 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 public @interface Config {
+
+    /**
+     * The name/identifier of the config
+     * This is used to identify the config file and should be unique per plugin/mod
+     * Example:
+     *  Config(name="main") will result in generated file "main.yml"
+     * @return the name of the config
+     */
+    String name();
 }

@@ -1,0 +1,6 @@
+dependencies {
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.20.0'
+
+    implementation project(':integration:common-api')
+    implementation project(':integration:config-bridge')
+}

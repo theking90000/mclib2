@@ -4,7 +4,7 @@ import be.theking90000.mclib2.config.Config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
-@Config
+@Config(name = "main")
 public class MainConfig {
 
     @JsonProperty("print-startup-message")
