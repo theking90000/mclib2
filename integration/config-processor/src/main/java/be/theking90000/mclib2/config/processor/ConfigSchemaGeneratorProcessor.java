@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.github.victools.jsonschema.generator.*;
+import com.github.victools.jsonschema.module.jackson.JacksonModule;
+import com.github.victools.jsonschema.module.jackson.JacksonOption;
+import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationModule;
 import com.google.auto.service.AutoService;
 
 import java.io.IOException;
@@ -19,8 +22,10 @@ public class ConfigSchemaGeneratorProcessor implements ClassProcessor {
     private final SchemaGenerator generator;
 
     public ConfigSchemaGeneratorProcessor() {
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON);
-        SchemaGeneratorConfig config = configBuilder.build();
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
+                .with(new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE))
+                .with(new JakartaValidationModule())
+                .build();
         this.generator = new SchemaGenerator(config);
     }
 
