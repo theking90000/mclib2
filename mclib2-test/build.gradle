@@ -21,7 +21,8 @@ mclib2 {
 dependencies {
     compileOnly 'org.bukkit:bukkit:1.8.8-R0.1-SNAPSHOT'
 
-    implementation "be.theking90000.mclib2:config-api"
+    implementation "be.theking90000.mclib2:config-bukkit-bridge"
+    implementation "be.theking90000.mclib2:config-yaml-bridge"
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'

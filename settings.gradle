@@ -25,6 +25,7 @@ include(
         "integration:config-processor",
         "integration:config-bridge",
         "integration:config-yaml-bridge",
+        "integration:config-bukkit-bridge"
         //"framework:bukkit-integration",
 /*      "integrations:guice",
         "platform:plugin-system",

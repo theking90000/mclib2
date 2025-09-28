@@ -11,6 +11,7 @@ import com.networknt.schema.ValidationMessage;
 import jakarta.inject.Inject;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Set;
 
 public class YamlConfigLoader extends AbstractConfigLoader {
@@ -48,6 +49,11 @@ public class YamlConfigLoader extends AbstractConfigLoader {
 
     @Override
     public <T> void save(T config) {
-
+        try(OutputStream os = resolver.store(name(config.getClass())+".yaml")) {
+            if(os == null) throw new IllegalStateException("Could not get output stream for config " + config.getClass().getName());
+            mapper.writerWithDefaultPrettyPrinter().writeValue(os, config);
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not save config for class " + config.getClass().getName(), e);
+        }
     }
 }

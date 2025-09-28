@@ -3,4 +3,11 @@ dependencies {
 
     api project(":integration:common-bridge")
     api project(":integration:config-api")
+
+    implementation project(':integration:common-api')
+
+    implementation project(":integration:common-bridge")
+
+    implementation project(':core:annotation-system:api')
+    annotationProcessor project(":core:annotation-system:processor")
 }

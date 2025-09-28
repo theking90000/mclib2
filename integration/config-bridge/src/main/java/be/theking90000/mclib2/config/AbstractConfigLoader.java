@@ -1,7 +1,8 @@
 package be.theking90000.mclib2.config;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
+
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 public abstract class AbstractConfigLoader extends JsonSchemaLoader implements ConfigLoader {
 

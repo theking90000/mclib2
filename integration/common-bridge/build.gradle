@@ -4,6 +4,6 @@ dependencies {
     compileOnly project(':core:annotation-system:api')
 
     implementation project(':integration:common-api')
-    implementation project(':core:runtime')
+    api project(':core:runtime')
     annotationProcessor project(":core:annotation-system:processor")
 }

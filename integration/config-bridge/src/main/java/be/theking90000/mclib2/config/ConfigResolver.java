@@ -10,7 +10,7 @@ public interface ConfigResolver {
      * @param name the name of the configuration to resolve
      * @return the InputStream of the resolved configuration, or null if not found
      */
-    InputStream resolve(String name);
+    InputStream resolve(String name) throws IOException;
 
     default String resolveAsString(String name) throws IOException {
         try(InputStream in = resolve(name)) {
@@ -32,6 +32,6 @@ public interface ConfigResolver {
      * @param name the name of the configuration to store
      * @return the OutputStream to write the configuration to
      */
-    OutputStream store(String name);
+    OutputStream store(String name) throws IOException;
 
 }
