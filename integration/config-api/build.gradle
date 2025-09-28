@@ -1,0 +1,8 @@
+
+dependencies {
+    api project(":integration:config-annotations")
+    compileOnlyApi project(":integration:config-processor")
+
+    api "jakarta.annotation:jakarta.annotation-api:2.1.1"
+    api "jakarta.validation:jakarta.validation-api:3.1.1"
+}

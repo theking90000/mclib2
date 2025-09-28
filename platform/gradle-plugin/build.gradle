@@ -19,6 +19,7 @@ jar {
 
 dependencies {
     implementation project(':platform:boot')
+    implementation project(":platform:gradle-plugin-processor")
 
     implementation 'org.yaml:snakeyaml:2.5'
     implementation 'org.ow2.asm:asm:9.8'

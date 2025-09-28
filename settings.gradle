@@ -11,6 +11,7 @@ include(
         "platform:boot",
         "platform:boot-api",
         "platform:gradle-plugin",
+        "platform:gradle-plugin-processor",
         "platform:standalone-adapter",
         "platform:bukkit-adapter",
         "integration:injector",
@@ -18,6 +19,10 @@ include(
         "integration:common-bridge",
         "integration:bukkit-bridge",
         "integration:bukkit-api",
+
+        "integration:config-annotations",
+        "integration:config-api",
+        "integration:config-processor",
         //"framework:bukkit-integration",
 /*      "integrations:guice",
         "platform:plugin-system",

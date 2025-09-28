@@ -1,0 +1,8 @@
+dependencies {
+    api project(':integration:config-annotations')
+    api 'com.github.victools:jsonschema-generator:4.38.0'
+    api project(":platform:gradle-plugin-processor")
+
+    compileOnly "com.google.auto.service:auto-service-annotations:1.1.1"
+    annotationProcessor "com.google.auto.service:auto-service:1.1.1"
+}

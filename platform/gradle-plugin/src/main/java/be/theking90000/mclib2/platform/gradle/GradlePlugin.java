@@ -3,10 +3,12 @@ package be.theking90000.mclib2.platform.gradle;
 import be.theking90000.mclib2.platform.gradle.tasks.BukkitPluginRenameTask;
 import be.theking90000.mclib2.platform.gradle.tasks.GeneratePluginDescriptor;
 import be.theking90000.mclib2.platform.gradle.tasks.PluginYaml;
+import be.theking90000.mclib2.platform.gradle.tasks.RunClassProcessorsTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
@@ -62,12 +64,37 @@ public class GradlePlugin implements Plugin<Project> {
         Configuration runtime = createConfiguration(target, "MCLib2Runtime");
         runtime.extendsFrom(target.getConfigurations().getByName("runtimeClasspath"));
 
+        TaskProvider<RunClassProcessorsTask> runClassProcessors = target.getTasks().register("runClassProcessors", RunClassProcessorsTask.class, t -> {
+            t.setGroup("mclib2");
+
+            // Wire input classpath
+            SourceSetContainer sourceSets = target.getExtensions().getByType(SourceSetContainer.class);
+            t.getCompileClasspath().from(
+                    sourceSets.getByName("main").getCompileClasspath()
+            );
+            t.getRuntimeClasspath().from(
+                    sourceSets.getByName("main").getRuntimeClasspath()
+            );
+
+            // Default output directory under build/
+            t.getOutputDir().set(target.getLayout().getBuildDirectory().dir("generated-processors/"));
+
+            // Make this task depend on classes
+            t.dependsOn(target.getTasks().named("classes"));
+        });
 
         TaskProvider<Jar> codeJar = target.getTasks().register("codeJar", Jar.class, jar -> {
             jar.setGroup("mclib2");
             jar.getArchiveBaseName().set(target.getGroup() + "-" + target.getName());
             SourceSetContainer sourceSets = target.getExtensions().getByType(SourceSetContainer.class);
             jar.from(sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).getOutput());
+
+            jar.dependsOn(runClassProcessors);
+
+            // Add generated outputs to jar content
+            jar.from(
+                    runClassProcessors
+            );
         });
 
         TaskProvider<GeneratePluginDescriptor> descriptor = target.getTasks()
