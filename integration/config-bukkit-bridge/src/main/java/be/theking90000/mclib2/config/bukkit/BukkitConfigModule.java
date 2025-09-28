@@ -12,7 +12,6 @@ public class BukkitConfigModule extends AbstractModule {
 
     private final JavaPlugin javaPlugin;
 
-    @Inject
     public BukkitConfigModule(JavaPlugin javaPlugin) {
         this.javaPlugin = javaPlugin;
     }

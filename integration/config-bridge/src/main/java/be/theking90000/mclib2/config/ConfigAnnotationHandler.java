@@ -26,18 +26,9 @@ public class ConfigAnnotationHandler implements AnnotationHandler<Object> {
             @Override
             public void configure(Binder binder) {
                 Provider<?> p = new ConfigDynamicProvider(clazz);
-                // Intellij IDEA bug?
-                // It says there is two method candidate for provider
-                // And says toProvider(Provider<?>) twice except that one is
-                // com.google.inject.Provider<T> and the other one is
-                // jakarta.inject.Provider<T> but it seems to treat it
-                // as the same method??
-
-                // Even though intellij says there's an error here
-                // It compiles and works fine
 
                 // noinspection
-                binder.bind(clazz).toProvider((Provider) p);
+                binder.bind(clazz).toProvider((jakarta.inject.Provider) p);
             }
         });
     }
