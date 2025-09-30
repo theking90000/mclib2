@@ -19,6 +19,8 @@ include(
         "integration:common-bridge",
         "integration:bukkit-bridge",
         "integration:bukkit-api",
+        "integration:guice-api",
+        "integration:guice-bridge",
 
         "integration:config-annotations",
         "integration:config-api",
