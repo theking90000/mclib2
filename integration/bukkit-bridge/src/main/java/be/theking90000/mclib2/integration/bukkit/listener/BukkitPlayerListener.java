@@ -18,7 +18,7 @@ public class BukkitPlayerListener implements Listener {
 
     private final Map<Player, Map<Class<? extends Event>, Set<RegisteredListener>>> playerListeners = new HashMap<>();
    // private final Map<Class<? extends Listener>, Map<Class<? extends Event>, Set<RegisteredListener>>> listenerClasses = new HashMap<>();
-    private final Set<Class<? extends Listener>> listenerClasses = new HashSet<>();
+    private final Map<Class<? extends Listener>, List<PlayerRegisteredListener>> listenerClasses = new HashMap<>();
 
     private final PlayerScope playerScope;
     private final JavaPlugin javaPlugin;
@@ -33,8 +33,8 @@ public class BukkitPlayerListener implements Listener {
     }
 
     public void addListenerClass(Class<? extends Listener> listenerClass) {
-        if(!listenerClasses.contains(listenerClass)) {
-            listenerClasses.add(listenerClass);
+        if(!listenerClasses.containsKey(listenerClass)) {
+            listenerClasses.put(listenerClass, new ArrayList<>());
 
             for (Player player: javaPlugin.getServer().getOnlinePlayers()) {
                 playerScope.enter(player.getUniqueId());
@@ -50,7 +50,7 @@ public class BukkitPlayerListener implements Listener {
     }
 
     private Map<Class<? extends Event>, Set<RegisteredListener>> getRegisteredListenersForClass(Class<? extends Listener> listenerClass, Listener instance) {
-        if(!listenerClasses.contains(listenerClass)) {
+        if(!listenerClasses.containsKey(listenerClass)) {
             throw new IllegalArgumentException("Listener class " + listenerClass.getName() + " is not registered");
         }
 
@@ -66,7 +66,7 @@ public class BukkitPlayerListener implements Listener {
         try {
             playerScope.seed(Player.class, player);
 
-            for (Class<? extends Listener> listenerClass : listenerClasses) {
+            for (Class<? extends Listener> listenerClass : listenerClasses.keySet()) {
                 registerListenerForPlayer(player, injector.getInstance(listenerClass));
             }
         } catch (Exception e) {
@@ -93,24 +93,38 @@ public class BukkitPlayerListener implements Listener {
     private Listener registerListenerForPlayer(Player player, Listener listener) {
         Class<? extends Listener> listenerClass = listener.getClass();
 
+        List<PlayerRegisteredListener> playerRegisteredListeners = this.listenerClasses.get(listenerClass);
+
+        int i = 0;
         for (Map.Entry<Class<? extends Event>, Set<RegisteredListener>> entry : getRegisteredListenersForClass(listenerClass, listener).entrySet()) {
             for (RegisteredListener registeredListener : entry.getValue()) {
-                registerListenerForPlayer(player, entry.getKey(), registeredListener, listener);
+                if(PlayerEvent.class.isAssignableFrom(entry.getKey())) {
+
+                    PlayerRegisteredListener prl;
+
+                    if (i >= playerRegisteredListeners.size()) {
+                        prl = new PlayerRegisteredListener(registeredListener);
+                        bukkitListenerManager.registerListener(entry.getKey(), prl);
+                        playerRegisteredListeners.add(prl);
+                    } else {
+                        prl = playerRegisteredListeners.get(i);
+                    }
+
+                    prl.addPlayerListener(player, registeredListener);
+                    registerListenerForPlayer(player, entry.getKey(), registeredListener);
+
+                    i+=1;
+                } else {
+                    bukkitListenerManager.registerListener(entry.getKey(), registeredListener);
+                    registerListenerForPlayer(player, entry.getKey(), registeredListener);
+                }
             }
         }
 
         return listener;
     }
 
-    private void registerListenerForPlayer(Player player, Class<? extends Event> event, RegisteredListener registeredListener, Listener listener) {
-        RegisteredListener l = registeredListener;
-
-        if (PlayerEvent.class.isAssignableFrom(event)) {
-            l = new PlayerRegisteredListener(registeredListener, player, listener);
-        }
-
-        bukkitListenerManager.registerListener(event, l);
-
+    private void registerListenerForPlayer(Player player, Class<? extends Event> event, RegisteredListener l) {
         playerListeners.computeIfAbsent(player, (k) -> new HashMap<>())
                 .computeIfAbsent(event, (k) -> new HashSet<>())
                 .add(l);
@@ -119,9 +133,19 @@ public class BukkitPlayerListener implements Listener {
     private void unregisterListenerForPlayer(Player player) {
         Map<Class<? extends Event>, Set<RegisteredListener>> listeners = playerListeners.remove(player);
         if (listeners != null) {
+
             for (Map.Entry<Class<? extends Event>, Set<RegisteredListener>> entry : listeners.entrySet()) {
                 for (RegisteredListener rl : entry.getValue()) {
-                    bukkitListenerManager.unregisterListener(entry.getKey(), rl);
+
+                    List<PlayerRegisteredListener> playerRegisteredListeners = this.listenerClasses.get(rl.getListener().getClass());
+
+                    if(PlayerEvent.class.isAssignableFrom(entry.getKey())) {
+                        for (PlayerRegisteredListener prl : playerRegisteredListeners) {
+                            prl.removePlayerListener(player, rl);
+                        }
+                    } else {
+                        bukkitListenerManager.unregisterListener(entry.getKey(), rl);
+                    }
                 }
             }
         }

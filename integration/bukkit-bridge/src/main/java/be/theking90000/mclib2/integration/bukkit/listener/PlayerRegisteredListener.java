@@ -7,21 +7,45 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.plugin.RegisteredListener;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 public class PlayerRegisteredListener extends RegisteredListener {
 
-    private RegisteredListener registeredListener;
-    private Player player;
+    private final Map<Player, Set<RegisteredListener>> playerRegisteredListeners = new HashMap<>();
 
-    public PlayerRegisteredListener(RegisteredListener registeredListener, Player player, Listener listener) {
-        super(listener, null, registeredListener.getPriority(), registeredListener.getPlugin(), registeredListener.isIgnoringCancelled());
-        this.registeredListener = registeredListener;
-        this.player = player;
+    protected PlayerRegisteredListener(RegisteredListener registeredListener) {
+        super(/* dummy listener*/new Listener() {},
+                null,
+                registeredListener.getPriority(),
+                registeredListener.getPlugin(),
+                registeredListener.isIgnoringCancelled());
+    }
+
+    protected void addPlayerListener(Player player, RegisteredListener listeners) {
+        playerRegisteredListeners.computeIfAbsent(player, (k) -> new HashSet<>()).add(listeners);
+    }
+
+    protected void removePlayerListener(Player player, RegisteredListener listeners) {
+        Set<RegisteredListener> set = playerRegisteredListeners.get(player);
+        if(set != null) {
+            set.remove(listeners);
+            if(set.isEmpty()) {
+                playerRegisteredListeners.remove(player);
+            }
+        }
     }
 
     @Override
     public void callEvent(Event event) throws EventException {
-       if(((PlayerEvent) event).getPlayer() == player) {
-           registeredListener.callEvent(event);
+       Player p = ((PlayerEvent) event).getPlayer();
+       Set<RegisteredListener> registeredListeners = playerRegisteredListeners.get(p);
+       if (registeredListeners != null) {
+           for (RegisteredListener rl : registeredListeners) {
+               rl.callEvent(event);
+           }
        }
     }
 }
