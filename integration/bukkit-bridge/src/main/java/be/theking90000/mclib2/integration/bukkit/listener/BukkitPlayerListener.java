@@ -17,7 +17,8 @@ import java.util.*;
 public class BukkitPlayerListener implements Listener {
 
     private final Map<Player, Map<Class<? extends Event>, Set<RegisteredListener>>> playerListeners = new HashMap<>();
-    private final Map<Class<? extends Listener>, Map<Class<? extends Event>, Set<RegisteredListener>>> listenerClasses = new HashMap<>();
+   // private final Map<Class<? extends Listener>, Map<Class<? extends Event>, Set<RegisteredListener>>> listenerClasses = new HashMap<>();
+    private final Set<Class<? extends Listener>> listenerClasses = new HashSet<>();
 
     private final PlayerScope playerScope;
     private final JavaPlugin javaPlugin;
@@ -32,8 +33,8 @@ public class BukkitPlayerListener implements Listener {
     }
 
     public void addListenerClass(Class<? extends Listener> listenerClass) {
-        if(!listenerClasses.containsKey(listenerClass)) {
-            listenerClasses.put(listenerClass, null);
+        if(!listenerClasses.contains(listenerClass)) {
+            listenerClasses.add(listenerClass);
 
             for (Player player: javaPlugin.getServer().getOnlinePlayers()) {
                 playerScope.enter(player.getUniqueId());
@@ -49,17 +50,11 @@ public class BukkitPlayerListener implements Listener {
     }
 
     private Map<Class<? extends Event>, Set<RegisteredListener>> getRegisteredListenersForClass(Class<? extends Listener> listenerClass, Listener instance) {
-        if(!listenerClasses.containsKey(listenerClass)) {
+        if(!listenerClasses.contains(listenerClass)) {
             throw new IllegalArgumentException("Listener class " + listenerClass.getName() + " is not registered");
         }
 
-        Map<Class<? extends Event>, Set<RegisteredListener>> listeners = listenerClasses.get(listenerClass);
-        if (listeners == null) {
-            listeners = javaPlugin.getPluginLoader().createRegisteredListeners(instance, javaPlugin);
-            listenerClasses.put(listenerClass, listeners);
-        }
-
-        return listeners;
+        return javaPlugin.getPluginLoader().createRegisteredListeners(instance, javaPlugin);
     }
 
     @EventHandler
@@ -71,7 +66,7 @@ public class BukkitPlayerListener implements Listener {
         try {
             playerScope.seed(Player.class, player);
 
-            for (Class<? extends Listener> listenerClass : listenerClasses.keySet()) {
+            for (Class<? extends Listener> listenerClass : listenerClasses) {
                 registerListenerForPlayer(player, injector.getInstance(listenerClass));
             }
         } catch (Exception e) {
@@ -131,11 +126,6 @@ public class BukkitPlayerListener implements Listener {
             }
         }
 
-        // Avoid memory leaks by clearing listenerClasses when unregistering a player
-        // Ideally, this should only remove the cached listeners that are no longer needed,
-        // (i.e. those that were created by the player who just quit)
-        // but for simplicity, we clear all cached listener instances here.
-        listenerClasses.replaceAll((k,v) -> null);
     }
 
 
