@@ -3,7 +3,6 @@ package be.theking90000.mclib2.test;
 import be.theking90000.mclib2.integration.bukkit.BukkitListener;
 import be.theking90000.mclib2.integration.bukkit.PlayerScoped;
 import com.google.inject.Inject;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -12,16 +11,17 @@ import org.bukkit.event.player.PlayerInteractEvent;
 @PlayerScoped
 public class PlayerHitListener implements Listener {
 
-    private final Player player;
+    private final CustomPlayer player;
 
     @Inject
-    public PlayerHitListener(Player player) {
+    public PlayerHitListener(CustomPlayer player) {
         this.player = player;
     }
 
     @EventHandler
     public void on(PlayerInteractEvent event) {
-        player.sendMessage("You interacted with " + event.getAction().name());
+        player.addMoney(1);
+        player.getPlayer().sendMessage("You interacted with " + event.getAction().name() + " | Money: " + player.getMoney());
     }
 
 }

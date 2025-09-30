@@ -6,7 +6,9 @@ import be.theking90000.mclib2.integration.guice.GuiceModuleAnnotationHandlerFact
 import be.theking90000.mclib2.runtime.AnnotationHandler;
 import com.google.inject.Binder;
 import com.google.inject.Module;
+import com.google.inject.ScopeAnnotation;
 
+import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,6 +25,9 @@ public class ServiceRegisterHandler implements AnnotationHandler<Object> {
 
     @Override
     public void handle(Class<?> clazz) throws Exception {
+        if(checkScopeAnnotation(clazz))
+            return;
+
         serviceClasses.add(clazz);
 
         modules.add(new Module() {
@@ -33,8 +38,17 @@ public class ServiceRegisterHandler implements AnnotationHandler<Object> {
         });
     }
 
+    private boolean checkScopeAnnotation(Class<?> cls) {
+        for(Annotation a: cls.getAnnotations()) {
+            if(a.annotationType().isAnnotationPresent(ScopeAnnotation.class))
+                return true;
+        }
+        return false;
+    }
+
     @Override
     public void destroy() throws Exception {
+        serviceClasses.clear();
         System.out.println("Destroying ServiceRegisterHandler");
     }
 }

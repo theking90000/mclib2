@@ -9,7 +9,6 @@ import be.theking90000.mclib2.integration.guice.GuiceInjectorAnnotationHandlerFa
 import be.theking90000.mclib2.runtime.AnnotationHandler;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -19,6 +18,8 @@ public class BukkitListenerAnnotationHandler implements AnnotationHandler<Listen
 
     private final Injector injector;
 
+    // TODO: make this GUICE singleton : allow use in @AnnotationLoader(Service.class) module
+    // To "registerService" in bukkitListenerManager
     private final BukkitListenerManager bukkitListenerManager;
     private final BukkitPlayerListener bukkitPlayerListener;
 
@@ -38,7 +39,7 @@ public class BukkitListenerAnnotationHandler implements AnnotationHandler<Listen
 
     @Override
     public void handle(Class<? extends Listener> clazz) throws Exception {
-        if(!Listener.class.isAssignableFrom(clazz))
+        if (!Listener.class.isAssignableFrom(clazz))
             throw new IllegalArgumentException("Class " + clazz.getName() + " is not a Bukkit Listener");
 
         if (clazz.isAnnotationPresent(PlayerScoped.class)) {
@@ -52,7 +53,6 @@ public class BukkitListenerAnnotationHandler implements AnnotationHandler<Listen
     public void destroy() throws Exception {
         bukkitListenerManager.unregisterAllListeners();
     }
-
 
 
 }
