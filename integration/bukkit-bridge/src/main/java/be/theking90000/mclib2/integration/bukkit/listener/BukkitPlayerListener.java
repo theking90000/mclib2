@@ -1,7 +1,9 @@
 package be.theking90000.mclib2.integration.bukkit.listener;
 
 import be.theking90000.mclib2.integration.bukkit.player.PlayerScope;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -14,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 
+@Singleton
 public class BukkitPlayerListener implements Listener {
 
     private final Map<Player, Map<Class<? extends Event>, Set<RegisteredListener>>> playerListeners = new HashMap<>();
@@ -25,6 +28,7 @@ public class BukkitPlayerListener implements Listener {
     private final Injector injector;
     private final BukkitListenerManager bukkitListenerManager;
 
+    @Inject
     public BukkitPlayerListener(PlayerScope playerScope, JavaPlugin javaPlugin, BukkitListenerManager bukkitListenerManager, Injector injector) {
         this.playerScope = playerScope;
         this.javaPlugin = javaPlugin;

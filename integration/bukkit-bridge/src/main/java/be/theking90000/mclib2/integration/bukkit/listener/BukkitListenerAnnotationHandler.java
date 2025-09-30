@@ -10,7 +10,6 @@ import be.theking90000.mclib2.runtime.AnnotationHandler;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
 
 @AnnotationLoader(BukkitListener.class)
 @InjectStrategy(GuiceInjectorAnnotationHandlerFactory.class)
@@ -24,21 +23,19 @@ public class BukkitListenerAnnotationHandler implements AnnotationHandler<Listen
     private final BukkitPlayerListener bukkitPlayerListener;
 
     @Inject
-    public BukkitListenerAnnotationHandler(JavaPlugin javaPlugin, PlayerScope playerScope, Injector injector) {
+    public BukkitListenerAnnotationHandler(Injector injector,
+                                           BukkitListenerManager bukkitListenerManager,
+                                           BukkitPlayerListener bukkitPlayerListener) {
         this.injector = injector;
-        this.bukkitListenerManager = new BukkitListenerManager(javaPlugin);
-        this.bukkitPlayerListener = new BukkitPlayerListener(
-                playerScope,
-                javaPlugin,
-                bukkitListenerManager,
-                injector
-        );
+        this.bukkitListenerManager = bukkitListenerManager;
+        this.bukkitPlayerListener = bukkitPlayerListener;
 
         this.bukkitListenerManager.registerListener(bukkitPlayerListener);
     }
 
     @Override
     public void handle(Class<? extends Listener> clazz) throws Exception {
+        // TODO: rework via Matchers and TypeListeners to allow any injector.getInstance(clazz) call
         if (!Listener.class.isAssignableFrom(clazz))
             throw new IllegalArgumentException("Class " + clazz.getName() + " is not a Bukkit Listener");
 

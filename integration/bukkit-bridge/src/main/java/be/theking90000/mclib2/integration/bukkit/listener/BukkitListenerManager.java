@@ -1,5 +1,7 @@
 package be.theking90000.mclib2.integration.bukkit.listener;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -12,6 +14,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@Singleton
 public class BukkitListenerManager {
 
     private final JavaPlugin javaPlugin;
@@ -21,6 +24,7 @@ public class BukkitListenerManager {
     private final Map<Class<? extends Event>, Set<RegisteredListener>> registeredListeners = new java.util.HashMap<>();
     private final Map<Listener, Map<Class<? extends Event>, Set<RegisteredListener>>> listenerMap = new java.util.HashMap<>();
 
+    @Inject
     public BukkitListenerManager(JavaPlugin javaPlugin) {
         this.javaPlugin = javaPlugin;
         this.pluginManager = javaPlugin.getServer().getPluginManager();
