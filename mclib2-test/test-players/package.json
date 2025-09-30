@@ -1,0 +1,16 @@
+{
+  "name": "test-players",
+  "version": "1.0.0",
+  "description": "Test mclib2 functionnality by connecting fake players to server",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "mineflayer": "^4.33.0",
+    "prismarine-chat": "^1.12.0"
+  }
+}
