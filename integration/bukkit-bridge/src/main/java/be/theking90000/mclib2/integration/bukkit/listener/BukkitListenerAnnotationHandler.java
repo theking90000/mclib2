@@ -51,6 +51,7 @@ public class BukkitListenerAnnotationHandler implements AnnotationHandler<Listen
 
     @Override
     public void destroy() throws Exception {
+        bukkitPlayerListener.removeAllListenerClass();
         bukkitListenerManager.unregisterAllListeners();
     }
 

@@ -15,13 +15,19 @@ import java.util.Set;
 public class PlayerRegisteredListener extends RegisteredListener {
 
     private final Map<Player, Set<RegisteredListener>> playerRegisteredListeners = new HashMap<>();
+    private final Class<? extends Event> event;
 
-    protected PlayerRegisteredListener(RegisteredListener registeredListener) {
+    protected PlayerRegisteredListener(RegisteredListener registeredListener, Class<? extends Event> event) {
         super(/* dummy listener*/new Listener() {},
                 null,
                 registeredListener.getPriority(),
                 registeredListener.getPlugin(),
                 registeredListener.isIgnoringCancelled());
+        this.event = event;
+    }
+
+    public Class<? extends Event> getEvent() {
+        return event;
     }
 
     protected void addPlayerListener(Player player, RegisteredListener listeners) {

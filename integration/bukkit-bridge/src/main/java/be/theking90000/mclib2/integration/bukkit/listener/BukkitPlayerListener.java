@@ -49,6 +49,25 @@ public class BukkitPlayerListener implements Listener {
         }
     }
 
+    public void removeListenerClass(Class<? extends Listener> listenerClass) {
+        if(listenerClasses.containsKey(listenerClass)) {
+            for (Player player: javaPlugin.getServer().getOnlinePlayers()) {
+                unregisterListenerForPlayer(player, listenerClass);
+            }
+
+            for (PlayerRegisteredListener prl : listenerClasses.get(listenerClass)) {
+                bukkitListenerManager.unregisterListener(prl.getEvent(), prl);
+            }
+            listenerClasses.remove(listenerClass);
+        }
+    }
+
+    public void removeAllListenerClass() {
+        for (Class<? extends Listener> listenerClass : new HashSet<>(listenerClasses.keySet())) {
+            removeListenerClass(listenerClass);
+        }
+    }
+
     private Map<Class<? extends Event>, Set<RegisteredListener>> getRegisteredListenersForClass(Class<? extends Listener> listenerClass, Listener instance) {
         if(!listenerClasses.containsKey(listenerClass)) {
             throw new IllegalArgumentException("Listener class " + listenerClass.getName() + " is not registered");
@@ -103,8 +122,8 @@ public class BukkitPlayerListener implements Listener {
                     PlayerRegisteredListener prl;
 
                     if (i >= playerRegisteredListeners.size()) {
-                        prl = new PlayerRegisteredListener(registeredListener);
-                        bukkitListenerManager.registerListener(entry.getKey(), prl);
+                        prl = new PlayerRegisteredListener(registeredListener, entry.getKey());
+                        bukkitListenerManager.registerListener(prl.getEvent(), prl);
                         playerRegisteredListeners.add(prl);
                     } else {
                         prl = playerRegisteredListeners.get(i);
@@ -149,7 +168,36 @@ public class BukkitPlayerListener implements Listener {
                 }
             }
         }
+    }
 
+    private void unregisterListenerForPlayer(Player player, Class<? extends Listener> listenerClass) {
+        Map<Class<? extends Event>, Set<RegisteredListener>> listeners = playerListeners.get(player);
+        if (listeners != null) {
+            for (Map.Entry<Class<? extends Event>, Set<RegisteredListener>> entry : new HashSet<>(listeners.entrySet())) {
+                for (RegisteredListener rl : entry.getValue()) {
+
+                    if(rl.getListener().getClass().equals(listenerClass)) {
+                        List<PlayerRegisteredListener> playerRegisteredListeners = this.listenerClasses.get(rl.getListener().getClass());
+
+                        if(PlayerEvent.class.isAssignableFrom(entry.getKey())) {
+                            for (PlayerRegisteredListener prl : playerRegisteredListeners) {
+                                prl.removePlayerListener(player, rl);
+                            }
+                        } else {
+                            bukkitListenerManager.unregisterListener(entry.getKey(), rl);
+                        }
+                        listeners.get(entry.getKey()).remove(rl);
+                        if (listeners.get(entry.getKey()).isEmpty()) {
+                            listeners.remove(entry.getKey());
+                        }
+                    }
+                }
+            }
+
+            if (listeners.isEmpty()) {
+                playerListeners.remove(player);
+            }
+        }
     }
 
 
