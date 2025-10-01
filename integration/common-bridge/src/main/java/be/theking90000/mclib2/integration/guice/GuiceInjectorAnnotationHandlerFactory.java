@@ -1,15 +1,15 @@
 package be.theking90000.mclib2.integration.guice;
 
+import be.theking90000.mclib2.inject.CloseableInjector;
 import be.theking90000.mclib2.runtime.AbstractAnnotationHandlerFactory;
 import be.theking90000.mclib2.runtime.AnnotationHandler;
 import be.theking90000.mclib2.runtime.AnnotationHandlerFactory;
-import com.google.inject.Injector;
 
 public class GuiceInjectorAnnotationHandlerFactory extends AbstractAnnotationHandlerFactory {
 
-    private final Injector injector;
+    private final CloseableInjector injector;
 
-    public GuiceInjectorAnnotationHandlerFactory(Injector injector) {
+    public GuiceInjectorAnnotationHandlerFactory(CloseableInjector injector) {
         this.injector = injector;
     }
 
@@ -27,5 +27,6 @@ public class GuiceInjectorAnnotationHandlerFactory extends AbstractAnnotationHan
     @Override
     public <T extends AnnotationHandler<V>, V> void destroy(T handler) throws Exception {
         handler.destroy();
+        injector.close(handler);
     }
 }

@@ -3,6 +3,8 @@ dependencies {
     compileOnly project(':platform:boot-api')
     compileOnly project(':core:annotation-system:api')
 
+    api project(':integration:guice-bridge')
+
     implementation project(':integration:common-api')
     api project(':core:runtime')
     annotationProcessor project(":core:annotation-system:processor")
