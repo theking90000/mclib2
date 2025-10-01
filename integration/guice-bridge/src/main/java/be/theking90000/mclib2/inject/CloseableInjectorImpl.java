@@ -3,8 +3,8 @@ package be.theking90000.mclib2.inject;
 import com.google.inject.*;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CloseableInjectorImpl extends DelegateInjector implements CloseableInjector {
 
@@ -19,7 +19,15 @@ public class CloseableInjectorImpl extends DelegateInjector implements Closeable
     public static CloseableInjector createInjector(Stage stage, Collection<Module> modules) {
         CloseableRegistry registry = new CloseableRegistry();
 
-        Iterable<Module> m = Stream.concat(Stream.of(new CloseableModule(registry)), modules.stream()).collect(Collectors.toSet());
+        Set<Module> m = new HashSet<>();
+        m.add(new CloseableModule(registry));
+        m.addAll(modules);
+
+        for (Module mod : m) {
+            if (mod instanceof AbstractCloseableModule) {
+                ((AbstractCloseableModule) mod).injectDisposeListeners(registry.getDisposeListeners());
+            }
+        }
 
         CloseableInjectorImpl impl = new CloseableInjectorImpl(Guice.createInjector(stage, m), registry);
         registry.setInjector(impl);

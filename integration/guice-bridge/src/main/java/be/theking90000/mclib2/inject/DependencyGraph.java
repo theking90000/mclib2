@@ -5,9 +5,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DependencyGraph {
+public abstract class DependencyGraph {
 
     private final Map<Object, DependencyNode<?>> dependencies = new ConcurrentHashMap<>();
+
+    protected abstract <T> void dispose(T instance);
 
     public synchronized <T1, T2> void addDependency(T1 from, T2 to) {
         if (from == to)
@@ -25,7 +27,8 @@ public class DependencyGraph {
         DependencyNode<T> node = (DependencyNode<T>) dependencies.get(object);
 
         if (node == null)
-            throw new IllegalArgumentException("Object not registered in the dependency graph");
+            return;
+            // throw new IllegalArgumentException("Object not registered in the dependency graph");
 
         node.close();
     }
@@ -65,18 +68,6 @@ public class DependencyGraph {
             this.instance = instance;
         }
 
-        private void dispose() {
-            if (instance instanceof AutoCloseable) {
-                try {
-                    ((AutoCloseable) instance).close();
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to close instance of type " + instance.getClass(), e);
-                }
-            } else if (instance instanceof Disposable) {
-                ((Disposable) instance).dispose();
-            }
-        }
-
         public void close() {
             if (!dependents.isEmpty())
                 return;
@@ -87,7 +78,7 @@ public class DependencyGraph {
             }
             dependencies.clear();
 
-            dispose();
+            dispose(instance);
             removeNode(instance);
         }
 

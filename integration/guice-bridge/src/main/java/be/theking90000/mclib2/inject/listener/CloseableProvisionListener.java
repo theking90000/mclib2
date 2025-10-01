@@ -2,7 +2,10 @@ package be.theking90000.mclib2.inject.listener;
 
 import be.theking90000.mclib2.inject.CloseableRegistry;
 import com.google.inject.*;
-import com.google.inject.spi.*;
+import com.google.inject.spi.BindingScopingVisitor;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.ProvisionListener;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;

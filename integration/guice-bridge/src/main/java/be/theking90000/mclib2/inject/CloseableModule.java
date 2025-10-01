@@ -1,10 +1,10 @@
 package be.theking90000.mclib2.inject;
 
+import be.theking90000.mclib2.inject.listener.CloseableDisposeListener;
 import be.theking90000.mclib2.inject.listener.CloseableProvisionListener;
-import com.google.inject.AbstractModule;
 import com.google.inject.matcher.Matchers;
 
-public class CloseableModule extends AbstractModule {
+public class CloseableModule extends AbstractCloseableModule {
 
     private final CloseableRegistry registry;
 
@@ -17,5 +17,7 @@ public class CloseableModule extends AbstractModule {
         bindListener(Matchers.any(), new CloseableProvisionListener(registry));
 
         bind(CloseableInjector.class).toProvider(registry::getInjector);
+
+        bindListener(new CloseableDisposeListener());
     }
 }
