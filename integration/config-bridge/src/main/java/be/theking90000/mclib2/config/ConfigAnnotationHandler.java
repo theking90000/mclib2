@@ -28,7 +28,7 @@ public class ConfigAnnotationHandler implements AnnotationHandler<Object> {
                 Provider<?> p = new ConfigDynamicProvider(clazz);
 
                 // noinspection
-                binder.bind(clazz).toProvider((jakarta.inject.Provider) p);
+                binder.bind(clazz).toProvider((jakarta.inject.Provider) p).in(Singleton.class);
             }
         });
     }
