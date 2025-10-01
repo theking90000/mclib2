@@ -85,6 +85,8 @@ public class CloseableProvisionListener implements ProvisionListener {
             }
         });
 
+        registry.getDependencyGraph().register(instance);
+
         // Collect stack as direct dependencies of the provisioned instance
         for (Dependency<?> dep : collectDependencies(provision.getBinding().getKey())) {
             System.out.println("Binding dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
@@ -98,7 +100,7 @@ public class CloseableProvisionListener implements ProvisionListener {
 
                 if (o == null) {
                     System.out.println("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
-                    // throw new IllegalStateException("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
+                    throw new IllegalStateException("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
                 }
             } else {
                 o = deq.pop();
@@ -107,14 +109,13 @@ public class CloseableProvisionListener implements ProvisionListener {
                     provisionInstances.remove(dep.getKey());
             }
 
-            if (o != null)
-                registry.getDependencyGraph().addDependency(instance, o);
+            registry.getDependencyGraph().addDependency(instance, o);
         }
 
-        if (!registry.getSingletonInstances().containsValue(instance)) {
+        //if (!registry.getSingletonInstances().containsValue(instance)) {
             provisionInstances
                     .computeIfAbsent(provision.getBinding().getKey(), (k) -> new ArrayDeque<>())
                     .push(instance);
-        }
+        //}
     }
 }

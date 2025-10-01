@@ -22,6 +22,10 @@ public abstract class DependencyGraph {
         toNode.dependents.add(fromNode);
     }
 
+    public synchronized <T> void register(T object) {
+        getNode(object);
+    }
+
     @SuppressWarnings("unchecked")
     public synchronized <T> void close(T object) {
         DependencyNode<T> node = (DependencyNode<T>) dependencies.get(object);
