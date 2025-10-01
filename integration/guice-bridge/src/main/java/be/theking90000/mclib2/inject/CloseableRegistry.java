@@ -17,6 +17,10 @@ public class CloseableRegistry {
 
     private final DependencyGraph dependencyGraph = new DependencyGraph();
 
+    private final Map<Key<?>, Object> singletonInstances = new HashMap<>();
+
+    private CloseableInjector injector;
+
     /**
      * Get the map of provisioned instances for the current thread.
      * @return Map of provisioned instances.
@@ -29,4 +33,15 @@ public class CloseableRegistry {
         return dependencyGraph;
     }
 
+    public Map<Key<?>, Object> getSingletonInstances() {
+        return singletonInstances;
+    }
+
+    protected void setInjector(CloseableInjector injector) {
+        this.injector = injector;
+    }
+
+    protected CloseableInjector getInjector() {
+        return this.injector;
+    }
 }

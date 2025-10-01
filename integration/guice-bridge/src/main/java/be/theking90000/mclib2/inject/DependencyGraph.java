@@ -45,6 +45,16 @@ public class DependencyGraph {
         dependencies.remove(object);
     }
 
+    public String debug() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("flowchart TD").append('\n');
+        for(DependencyNode<?> node : dependencies.values()) {
+            sb.append(node.debug());
+        }
+
+        return sb.toString();
+    }
+
     private class DependencyNode<T> {
         private final T instance;
 
@@ -79,6 +89,28 @@ public class DependencyGraph {
 
             dispose();
             removeNode(instance);
+        }
+
+        private String toUniqueString() {
+            return instance.getClass().getName() + "$" + Integer.toHexString(System.identityHashCode(instance));
+        }
+
+        public String debug() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("    ").append(this.toUniqueString()).append('\n');
+            for (DependencyNode<?> dependency : dependencies) {
+                sb.append("    ")
+                        //.append("\"")
+                        .append(this.toUniqueString())
+                        //.append("\"")
+                         .append(" --> ")
+                        //.append("\"")
+                 .append(dependency.toUniqueString())
+                // ).append("\""
+                         .append("\n");
+            }
+
+            return sb.toString();
         }
     }
 }

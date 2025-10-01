@@ -15,5 +15,7 @@ public class CloseableModule extends AbstractModule {
     @Override
     protected void configure() {
         bindListener(Matchers.any(), new CloseableProvisionListener(registry));
+
+        bind(CloseableInjector.class).toProvider(registry::getInjector);
     }
 }

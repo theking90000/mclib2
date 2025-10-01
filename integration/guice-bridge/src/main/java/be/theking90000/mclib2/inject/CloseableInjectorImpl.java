@@ -21,22 +21,33 @@ public class CloseableInjectorImpl extends DelegateInjector implements Closeable
 
         Iterable<Module> m = Stream.concat(Stream.of(new CloseableModule(registry)), modules.stream()).collect(Collectors.toSet());
 
-        return new CloseableInjectorImpl(Guice.createInjector(stage, m), registry);
+        CloseableInjectorImpl impl = new CloseableInjectorImpl(Guice.createInjector(stage, m), registry);
+        registry.setInjector(impl);
+
+        return impl;
     }
 
     @Override
     public <T> T getInstance(Key<T> key) {
+        registry.getProvisionInstances().clear();
+
         return afterInjection(super.getInstance(key));
     }
 
     @Override
     public <T> T getInstance(Class<T> type) {
+        registry.getProvisionInstances().clear();
+
         return afterInjection(super.getInstance(type));
     }
 
     private <T> T afterInjection(T instance) {
         if (registry.getProvisionInstances().size() != 1) {
-            throw new IllegalStateException("Expected exactly one provisioned instance, but got " +
+            for (Key<?> k : registry.getProvisionInstances().keySet()) {
+                System.out.println(" - Provisioned but not bound: " + k);
+            }
+
+           throw new IllegalStateException("Expected exactly one provisioned instance, but got " +
                     registry.getProvisionInstances().size() +
                     ". This means the CloseableInjector did not detect the dependencies correctly." +
                     " Some fields/constructor variables where not linked to provisioned instances.");
@@ -55,4 +66,9 @@ public class CloseableInjectorImpl extends DelegateInjector implements Closeable
     public void close() {
         registry.getDependencyGraph().close();
     }
+
+    public String debugGraph() {
+        return registry.getDependencyGraph().debug();
+    }
+
 }

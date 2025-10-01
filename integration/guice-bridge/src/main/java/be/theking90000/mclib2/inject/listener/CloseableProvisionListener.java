@@ -1,11 +1,10 @@
 package be.theking90000.mclib2.inject.listener;
 
 import be.theking90000.mclib2.inject.CloseableRegistry;
-import com.google.inject.Key;
-import com.google.inject.spi.Dependency;
-import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.ProvisionListener;
+import com.google.inject.*;
+import com.google.inject.spi.*;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,16 +14,30 @@ public class CloseableProvisionListener implements ProvisionListener {
 
     private final CloseableRegistry registry;
 
+    @Inject
+    public Injector injector;
+
     public CloseableProvisionListener(CloseableRegistry registry) {
         this.registry = registry;
     }
 
+    // TODO: add caching for collectDependencies results
+    // TODO: since Key<?> -> Dependency<?> can be cached inside registry.
     private Set<Dependency<?>> collectDependencies(Key<?> key) {
-        InjectionPoint ip = InjectionPoint.forConstructorOf(key.getTypeLiteral());
-        Set<Dependency<?>> deps = new HashSet<>(ip.getDependencies());
+        Set<Dependency<?>> deps = new HashSet<>();
+        try {
+            InjectionPoint ip = InjectionPoint.forConstructorOf(key.getTypeLiteral());
+            deps.addAll(ip.getDependencies());
+        } catch (ConfigurationException e) {
+            // No injectable constructor, ignore
+        }
 
-        for(InjectionPoint pp : InjectionPoint.forInstanceMethodsAndFields(key.getTypeLiteral()))
-            deps.addAll(pp.getDependencies());
+        try {
+            for (InjectionPoint pp : InjectionPoint.forInstanceMethodsAndFields(key.getTypeLiteral()))
+                deps.addAll(pp.getDependencies());
+        } catch (ConfigurationException | NullPointerException e) {
+            // No injectable methods/fields, ignore
+        }
 
         return deps;
     }
@@ -33,21 +46,72 @@ public class CloseableProvisionListener implements ProvisionListener {
     public <T> void onProvision(ProvisionInvocation<T> provision) {
         Map<Key<?>, ArrayDeque<Object>> provisionInstances = registry.getProvisionInstances();
 
-        T instance = provision.provision();
+
+        System.out.println("Provisioning " + provision.getBinding().getKey());
+
+        // T instance = provision.provision();
+
+        T instance = provision.getBinding().acceptScopingVisitor(new BindingScopingVisitor<T>() {
+            @Override
+            public T visitEagerSingleton() {
+                T instance = provision.provision();
+                registry.getSingletonInstances().put(provision.getBinding().getKey(), instance);
+
+                return instance;
+            }
+
+            @Override
+            public T visitScope(Scope scope) {
+                if(scope == Scopes.SINGLETON) {
+                    T instance = provision.provision();
+                    registry.getSingletonInstances().put(provision.getBinding().getKey(), instance);
+
+                    return instance;
+                }
+                return provision.provision();
+            }
+
+            @Override
+            public T visitNoScoping() {
+                return provision.provision();
+            }
+
+            @Override
+            public T visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
+                return provision.provision();
+            }
+        });
+
         // Collect stack as direct dependencies of the provisioned instance
         for (Dependency<?> dep : collectDependencies(provision.getBinding().getKey())) {
+            System.out.println("Binding dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
             ArrayDeque<Object> deq = provisionInstances.get(dep.getKey());
-            if (deq == null || deq.isEmpty())
-                throw new IllegalStateException("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
-            Object o = deq.pop();
-            if (deq.isEmpty())
-                provisionInstances.remove(dep.getKey());
+            Object o;
+            if (deq == null || deq.isEmpty()) {
+                // TODO: Before throwing an error search for singleton, eagerly created instances, or static bindings.
+                // TODO: it might use TypeHear to prescan the graph and find such instances.
 
-            registry.getDependencyGraph().addDependency(instance, o);
+                o = registry.getSingletonInstances().get(dep.getKey());
+
+                if (o == null) {
+                    System.out.println("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
+                    // throw new IllegalStateException("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
+                }
+            } else {
+                o = deq.pop();
+
+                if (deq.isEmpty())
+                    provisionInstances.remove(dep.getKey());
+            }
+
+            if (o != null)
+                registry.getDependencyGraph().addDependency(instance, o);
         }
 
-        provisionInstances
-                .computeIfAbsent(provision.getBinding().getKey(), (k)-> new ArrayDeque<>())
-                .push(instance);
+        if (!registry.getSingletonInstances().containsValue(instance)) {
+            provisionInstances
+                    .computeIfAbsent(provision.getBinding().getKey(), (k) -> new ArrayDeque<>())
+                    .push(instance);
+        }
     }
 }

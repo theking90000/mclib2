@@ -2,6 +2,7 @@ import be.theking90000.mclib2.inject.CloseableInjector;
 import be.theking90000.mclib2.inject.CloseableInjectorImpl;
 import be.theking90000.mclib2.inject.Disposable;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import org.junit.jupiter.api.Test;
 
@@ -11,11 +12,15 @@ public class TestCloseableInjector {
 
     @Test
     public void testCreate() {
-        CloseableInjector injector = CloseableInjectorImpl.createInjector(Stage.DEVELOPMENT, Arrays.asList());
+        CloseableInjector injector = CloseableInjectorImpl.createInjector(Stage.PRODUCTION, Arrays.asList(
+                binder -> binder.bind(S.class).toInstance(new S())
+        ));
 
         A a1 = injector.getInstance(A.class);
         A a2 = injector.getInstance(A.class);
         B b1 = injector.getInstance(B.class);
+
+        System.out.println(((CloseableInjectorImpl)injector).debugGraph());
 
         System.out.println("a1 before close=" + a1);
 
@@ -28,6 +33,23 @@ public class TestCloseableInjector {
 
         System.out.println("a2 after close=" + a2);
         System.out.println("b1 after close=" + b1);
+    }
+
+    public static class S {
+        private static int j = 0;
+        private int i = 0;
+
+        public S() {
+            i = ++j;
+            System.out.println("New S : " + this);
+        }
+
+        @Override
+        public String toString() {
+            return "S{" +
+                    "i=" + i +
+                    '}';
+        }
     }
 
     public static class A {
@@ -117,6 +139,9 @@ public class TestCloseableInjector {
         private int i = 0;
         private boolean disposed;
 
+        @Inject
+        S s;
+
         public D() {
             i = ++j;
             disposed = false;
@@ -132,6 +157,8 @@ public class TestCloseableInjector {
         @Override
         public String toString() {
             return "D{" +
+                    "s=" + s +
+                    ", " +
                     "i=" + i +
                     ", disposed=" + disposed +
                     '}';
