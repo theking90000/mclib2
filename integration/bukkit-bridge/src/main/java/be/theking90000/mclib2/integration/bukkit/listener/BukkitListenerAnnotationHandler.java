@@ -13,6 +13,7 @@ import be.theking90000.mclib2.integration.scope.ScopeManager;
 import be.theking90000.mclib2.runtime.AnnotationHandler;
 import com.google.inject.Inject;
 import com.google.inject.Scope;
+import com.google.inject.Scopes;
 import org.bukkit.event.Listener;
 
 import java.util.*;
@@ -75,7 +76,10 @@ public class BukkitListenerAnnotationHandler implements AnnotationHandler<Listen
 
     @Override
     public void onScopeCreation(Scope scope) {
-        if(scope == playerScope) {
+        if (scope == Scopes.SINGLETON) {
+            for (Class<? extends Listener> clazz : listenerClasses)
+                listenersInstances.add(injector.getInstance(clazz));
+        } else if(scope == playerScope) {
             UUID player =  ((PlayerScope) scope).getCurrentPlayer();
             if (player == null)
                 throw new IllegalStateException("Player scope is not loaded!");
@@ -94,7 +98,11 @@ public class BukkitListenerAnnotationHandler implements AnnotationHandler<Listen
 
     @Override
     public void onScopeDeletion(Scope scope) {
-        if (scope == playerScope) {
+        if (scope == Scopes.SINGLETON) {
+            for (Listener listener : listenersInstances)
+                injector.close(listener);
+            listenersInstances.clear();
+        } else if (scope == playerScope) {
             UUID player =  ((PlayerScope) scope).getCurrentPlayer();
             if (player == null)
                 throw new IllegalStateException("Player scope is not loaded!");

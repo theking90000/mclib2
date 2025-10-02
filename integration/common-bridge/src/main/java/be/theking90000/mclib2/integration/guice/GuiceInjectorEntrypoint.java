@@ -46,6 +46,8 @@ public class GuiceInjectorEntrypoint {
 
     @PlatformDestroy
     public void destroy() {
+        ScopeManager manager = injector.getInstance(ScopeManager.class);
+        manager.notifyScopeDeletion(Scopes.SINGLETON);
         logger.fine("Shutting down Guice Injector");
         injector.close();
         bs.shutdown();
