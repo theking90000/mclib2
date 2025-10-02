@@ -8,6 +8,7 @@ import be.theking90000.mclib2.runtime.AnnotationHandler;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.ScopeAnnotation;
+import com.google.inject.Singleton;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -34,7 +35,7 @@ public class ServiceRegisterHandler implements AnnotationHandler<Object> {
         modules.add(new Module() {
             @Override
             public void configure(Binder binder) {
-                binder.bind(clazz).asEagerSingleton();
+                binder.bind(clazz).in(Singleton.class);
             }
         });
     }

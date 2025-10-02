@@ -21,7 +21,7 @@ public class GuiceInjectorEntrypoint {
         Set<Module> modules = PlatformStore.get("guiceModules");
 
         System.out.println("Creating Guice Injector (modules count=" + modules.size() + ")");
-        injector = CloseableInjectorImpl.createInjector(Stage.DEVELOPMENT, modules);
+        injector = CloseableInjectorImpl.createInjector(Stage.PRODUCTION, modules);
 
         System.out.println("Injector created" + injector);
 
