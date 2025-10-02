@@ -59,7 +59,7 @@ public class CloseableRegistry {
         }
     }
 
-    protected CloseableInjector getInjector() {
+    public CloseableInjector getInjector() {
         return this.injector;
     }
 }

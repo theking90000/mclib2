@@ -1,9 +1,9 @@
 package be.theking90000.mclib2.integration.bukkit.player;
 
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import com.google.inject.Scope;
-import com.google.inject.Scopes;
+import be.theking90000.mclib2.inject.CloseableRegistry;
+import be.theking90000.mclib2.integration.bukkit.PlayerScoped;
+import com.google.inject.*;
+import com.google.inject.spi.DefaultBindingScopingVisitor;
 
 import java.util.Map;
 import java.util.UUID;
@@ -25,9 +25,16 @@ public class PlayerScope implements Scope {
         }
     };
 
+    @Inject
+    CloseableRegistry closeableRegistry;
+
     public void enter(UUID playerId) {
         currentPlayer.set(playerId);
         scopedObjects.computeIfAbsent(playerId, (k) -> new ConcurrentHashMap<>());
+    }
+
+    public UUID getCurrentPlayer() {
+        return currentPlayer.get();
     }
 
     public void exit() {
@@ -84,5 +91,26 @@ public class PlayerScope implements Scope {
     @SuppressWarnings({"unchecked"})
     public static <T> Provider<T> seededKeyProvider() {
         return (Provider<T>) SEEDED_KEY_PROVIDER;
+    }
+
+    public <T> boolean isPlayerScoped(Binding<T> binding) {
+        return binding.acceptScopingVisitor(new DefaultBindingScopingVisitor<Boolean>() {
+            @Override
+            protected Boolean visitOther() {
+                return false;
+            };
+
+            @Override
+            public Boolean visitScope(Scope scope) {
+                return scope == PlayerScope.this;
+            }
+        });
+    }
+
+    public <T> boolean isPlayerScoped(Class<T> clazz) {
+        if (closeableRegistry.getInjector() == null)
+            return clazz.isAnnotationPresent(PlayerScoped.class);
+
+        return isPlayerScoped(closeableRegistry.getInjector().getBinding(clazz));
     }
 }

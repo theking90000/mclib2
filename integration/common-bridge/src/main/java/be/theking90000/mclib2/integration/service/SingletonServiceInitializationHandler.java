@@ -3,6 +3,7 @@ package be.theking90000.mclib2.integration.service;
 import be.theking90000.mclib2.annotations.AnnotationLoader;
 import be.theking90000.mclib2.annotations.InjectStrategy;
 import be.theking90000.mclib2.inject.CloseableInjector;
+import be.theking90000.mclib2.inject.Disposable;
 import be.theking90000.mclib2.integration.Service;
 import be.theking90000.mclib2.integration.guice.GuiceInjectorAnnotationHandlerFactory;
 import be.theking90000.mclib2.integration.scope.ScopeCreationListener;
@@ -19,7 +20,7 @@ import java.util.Set;
 @AnnotationLoader(Service.class)
 @InjectStrategy(GuiceInjectorAnnotationHandlerFactory.class)
 public class SingletonServiceInitializationHandler implements AnnotationHandler<Service>,
-        ScopeCreationListener, ScopeDeletionListener {
+        ScopeCreationListener, ScopeDeletionListener, Disposable {
 
     private final ScopeManager scopeManager;
     private final CloseableInjector injector;
@@ -68,5 +69,11 @@ public class SingletonServiceInitializationHandler implements AnnotationHandler<
             }
             services.clear();
         }
+    }
+
+    @Override
+    public void dispose() {
+        this.scopeManager.removeListener((ScopeCreationListener) this);
+        this.scopeManager.removeListener((ScopeDeletionListener) this);
     }
 }

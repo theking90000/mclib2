@@ -12,6 +12,8 @@ public class PlayerModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        requestInjection(playerScope);
+
         bindScope(PlayerScoped.class, playerScope);
         bind(PlayerScope.class).toInstance(playerScope);
 

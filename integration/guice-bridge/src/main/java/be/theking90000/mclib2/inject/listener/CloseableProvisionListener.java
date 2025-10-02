@@ -133,10 +133,10 @@ public class CloseableProvisionListener implements ProvisionListener {
 
             if (o == null) {
                 System.out.println("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
-                throw new IllegalStateException("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
+                // throw new IllegalStateException("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
+            } else {
+                registry.getDependencyGraph().addDependency(instance, o);
             }
-
-            registry.getDependencyGraph().addDependency(instance, o);
         }
 
         //if (!registry.getSingletonInstances().containsValue(instance)) {
