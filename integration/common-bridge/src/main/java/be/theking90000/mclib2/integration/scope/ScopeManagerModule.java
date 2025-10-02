@@ -9,6 +9,7 @@ public class ScopeManagerModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        bind(ScopeManagerImpl.class).in(Singleton.class);
         bind(ScopeManager.class).to(ScopeManagerImpl.class).in(Singleton.class);
     }
 }
