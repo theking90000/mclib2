@@ -1,6 +1,6 @@
 package be.theking90000.mclib2.integration.bukkit;
 
-import be.theking90000.mclib2.integration.GuiceModule;
+import be.theking90000.mclib2.integration.guice.GuiceModule;
 import com.google.inject.AbstractModule;
 import org.bukkit.plugin.java.JavaPlugin;
 

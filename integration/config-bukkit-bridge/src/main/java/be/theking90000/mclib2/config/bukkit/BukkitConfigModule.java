@@ -1,9 +1,8 @@
 package be.theking90000.mclib2.config.bukkit;
 
 import be.theking90000.mclib2.config.ConfigResolver;
-import be.theking90000.mclib2.integration.GuiceModule;
+import be.theking90000.mclib2.integration.guice.GuiceModule;
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.multibindings.Multibinder;
 import org.bukkit.plugin.java.JavaPlugin;
 

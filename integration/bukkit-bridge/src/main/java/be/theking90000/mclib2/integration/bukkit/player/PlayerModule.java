@@ -1,6 +1,6 @@
 package be.theking90000.mclib2.integration.bukkit.player;
 
-import be.theking90000.mclib2.integration.GuiceModule;
+import be.theking90000.mclib2.integration.guice.GuiceModule;
 import be.theking90000.mclib2.integration.bukkit.PlayerScoped;
 import com.google.inject.AbstractModule;
 import org.bukkit.entity.Player;

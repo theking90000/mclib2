@@ -1,6 +1,6 @@
 package be.theking90000.mclib2.test;
 
-import be.theking90000.mclib2.integration.GuiceModule;
+import be.theking90000.mclib2.integration.guice.GuiceModule;
 import com.google.inject.AbstractModule;
 
 @GuiceModule

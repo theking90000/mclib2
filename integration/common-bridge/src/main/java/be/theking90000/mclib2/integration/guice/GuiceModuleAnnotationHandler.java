@@ -2,7 +2,6 @@ package be.theking90000.mclib2.integration.guice;
 
 import be.theking90000.mclib2.annotations.AnnotationLoader;
 import be.theking90000.mclib2.annotations.InjectStrategy;
-import be.theking90000.mclib2.integration.GuiceModule;
 import be.theking90000.mclib2.runtime.AnnotationHandler;
 import com.google.inject.Module;
 

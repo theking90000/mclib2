@@ -1,8 +1,7 @@
 package be.theking90000.mclib2.integration.bukkit.listener;
 
 import be.theking90000.mclib2.inject.AbstractCloseableModule;
-import be.theking90000.mclib2.integration.GuiceModule;
-import com.google.inject.AbstractModule;
+import be.theking90000.mclib2.integration.guice.GuiceModule;
 import com.google.inject.matcher.Matchers;
 
 @GuiceModule
