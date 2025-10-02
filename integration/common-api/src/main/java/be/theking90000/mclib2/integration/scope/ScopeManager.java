@@ -9,7 +9,7 @@ import com.google.inject.Scope;
  * to notify when a new Scope is created.
  * </p>
  */
-public interface ScopeCreation {
+public interface ScopeManager {
 
     /**
      * Register a new scope creation listener

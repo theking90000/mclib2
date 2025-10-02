@@ -1,6 +1,5 @@
 package be.theking90000.mclib2.integration.scope;
 
-import com.google.inject.Inject;
 import com.google.inject.Scope;
 import com.google.inject.Singleton;
 
@@ -8,12 +7,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Singleton
-public class ScopeCreationImpl implements ScopeCreation {
+public class ScopeManagerImpl implements ScopeManager {
 
     private final Set<ScopeCreationListener> creationListeners = new HashSet<>();
     private final Set<ScopeDeletionListener> deletionListeners = new HashSet<>();
 
-    public ScopeCreationImpl() {}
+    public ScopeManagerImpl() {}
 
     @Override
     public void addListener(ScopeCreationListener creationListener) {

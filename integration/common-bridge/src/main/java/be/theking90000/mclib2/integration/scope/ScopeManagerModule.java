@@ -5,10 +5,10 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
 @GuiceModule
-public class ScopeCreationModule extends AbstractModule {
+public class ScopeManagerModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(ScopeCreation.class).to(ScopeCreationImpl.class).in(Singleton.class);
+        bind(ScopeManager.class).to(ScopeManagerImpl.class).in(Singleton.class);
     }
 }
