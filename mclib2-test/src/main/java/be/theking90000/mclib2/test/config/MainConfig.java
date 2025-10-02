@@ -1,11 +1,12 @@
 package be.theking90000.mclib2.test.config;
 
 import be.theking90000.mclib2.config.Config;
+import be.theking90000.mclib2.inject.Disposable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 @Config(name = "main")
-public class MainConfig {
+public class MainConfig implements Disposable {
 
     @JsonProperty("print-startup-message")
     @JsonPropertyDescription("If true, a startup message will be printed to the console.")
@@ -21,4 +22,8 @@ public class MainConfig {
         public boolean enableFeatureX = false;
     }
 
+    @Override
+    public void dispose() {
+        System.out.println("Disposing MainConfig");
+    }
 }

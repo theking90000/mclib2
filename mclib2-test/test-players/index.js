@@ -23,12 +23,16 @@ for (let i = 0; i < botCount; i++) {
     })
 
     bot.on('spawn', async ()=>{
-        await wait(1000);
+        //await wait(1000);
 
-        const block = bot.findBlock({matching:(b)=>true, maxDistance:5});
-       // console.log('block found:', block);
-        //bot.inte
-        await bot.dig(block);
-        console.log('interacted with a block');
+        setInterval(async() => {
+            const block = bot.findBlock({matching:(b)=>true, maxDistance:5});
+            // console.log('block found:', block);
+            //bot.inte
+            await bot.dig(block);
+            await bot.stopDigging();
+            console.log('interacted with a block');
+            }, (i+1)*1000)
+
     })
 }

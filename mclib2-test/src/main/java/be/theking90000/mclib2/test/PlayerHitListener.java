@@ -3,7 +3,6 @@ package be.theking90000.mclib2.test;
 import be.theking90000.mclib2.integration.bukkit.BukkitListener;
 import be.theking90000.mclib2.integration.bukkit.PlayerScoped;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -16,6 +15,7 @@ public class PlayerHitListener implements Listener {
 
     @Inject
     public PlayerHitListener(CustomPlayer player) {
+        System.out.println("PlayerHitListener::new("+player.getPlayer().getUniqueId()+")");
         this.player = player;
     }
 
