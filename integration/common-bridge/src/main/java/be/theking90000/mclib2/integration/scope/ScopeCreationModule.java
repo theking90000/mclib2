@@ -1,0 +1,14 @@
+package be.theking90000.mclib2.integration.scope;
+
+import be.theking90000.mclib2.integration.guice.GuiceModule;
+import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
+
+@GuiceModule
+public class ScopeCreationModule extends AbstractModule {
+
+    @Override
+    protected void configure() {
+        bind(ScopeCreation.class).to(ScopeCreationImpl.class).in(Singleton.class);
+    }
+}
