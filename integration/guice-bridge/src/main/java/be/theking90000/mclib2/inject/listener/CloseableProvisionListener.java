@@ -91,22 +91,49 @@ public class CloseableProvisionListener implements ProvisionListener {
         for (Dependency<?> dep : collectDependencies(provision.getBinding().getKey())) {
             System.out.println("Binding dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
             ArrayDeque<Object> deq = provisionInstances.get(dep.getKey());
-            Object o;
-            if (deq == null || deq.isEmpty()) {
-                // TODO: Before throwing an error search for singleton, eagerly created instances, or static bindings.
-                // TODO: it might use TypeHear to prescan the graph and find such instances.
+            Object o = null;
 
-                o = registry.getSingletonInstances().get(dep.getKey());
-
-                if (o == null) {
-                    System.out.println("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
-                    throw new IllegalStateException("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
-                }
-            } else {
+            if (deq != null && !deq.isEmpty()) {
                 o = deq.pop();
 
                 if (deq.isEmpty())
                     provisionInstances.remove(dep.getKey());
+            }
+
+            if (o == null) {
+                // Try to find equivalent Key in provision instances
+                for (Key<?> key : provisionInstances.keySet()) {
+                    if (dep.getKey().getTypeLiteral().getRawType().isAssignableFrom(key.getTypeLiteral().getRawType())) {
+                        deq = provisionInstances.get(key);
+                        if (deq != null && !deq.isEmpty()) {
+                            o = deq.pop();
+
+                            if (deq.isEmpty())
+                                provisionInstances.remove(dep.getKey());
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (o == null) {
+                o = registry.getSingletonInstances().get(dep.getKey());
+            }
+
+            if (o == null) {
+                // Try to find equivalent Key (supertype) in singleton
+                for (Key<?> key : registry.getSingletonInstances().keySet()) {
+                    if (dep.getKey().getTypeLiteral().getRawType().isAssignableFrom(key.getTypeLiteral().getRawType())) {
+                        o = registry.getSingletonInstances().get(key);
+                        break;
+                    }
+                }
+
+            }
+
+            if (o == null) {
+                System.out.println("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
+                throw new IllegalStateException("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
             }
 
             registry.getDependencyGraph().addDependency(instance, o);
