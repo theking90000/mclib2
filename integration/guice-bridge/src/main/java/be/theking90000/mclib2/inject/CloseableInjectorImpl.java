@@ -39,23 +39,26 @@ public class CloseableInjectorImpl extends DelegateInjector implements Closeable
     public <T> T getInstance(Key<T> key) {
         registry.getProvisionInstances().clear();
 
-        return afterInjection(super.getInstance(key));
+        return afterInjection(super.getBinding(key));
     }
 
     @Override
     public <T> T getInstance(Class<T> type) {
         registry.getProvisionInstances().clear();
 
-        return afterInjection(super.getInstance(type));
+        return afterInjection(super.getBinding(type));
     }
 
-    private <T> T afterInjection(T instance) {
+    private <T> T afterInjection(Binding<T> binding) {
+        T instance = binding.getProvider().get();
+
         if (registry.getProvisionInstances().size() != 1) {
             for (Key<?> k : registry.getProvisionInstances().keySet()) {
                 System.out.println(" - Provisioned but not bound: " + k);
             }
 
-           throw new IllegalStateException("Expected exactly one provisioned instance, but got " +
+            if(registry.getProvisionInstances().isEmpty() && !Scopes.isSingleton(binding))
+                throw new IllegalStateException("Expected exactly one provisioned instance, but got " +
                     registry.getProvisionInstances().size() +
                     ". This means the CloseableInjector did not detect the dependencies correctly." +
                     " Some fields/constructor variables where not linked to provisioned instances.");
