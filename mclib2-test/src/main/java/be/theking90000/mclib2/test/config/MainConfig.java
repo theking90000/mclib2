@@ -5,8 +5,12 @@ import be.theking90000.mclib2.inject.Disposable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
+import java.util.logging.Logger;
+
 @Config(name = "main")
 public class MainConfig implements Disposable {
+
+    private static final Logger logger = Logger.getLogger(MainConfig.class.getName());
 
     @JsonProperty("print-startup-message")
     @JsonPropertyDescription("If true, a startup message will be printed to the console.")
@@ -24,6 +28,6 @@ public class MainConfig implements Disposable {
 
     @Override
     public void dispose() {
-        System.out.println("Disposing MainConfig");
+        logger.info("Disposing MainConfig");
     }
 }

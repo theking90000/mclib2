@@ -5,6 +5,8 @@ import be.theking90000.mclib2.integration.bukkit.PlayerScoped;
 import com.google.inject.Inject;
 import org.bukkit.entity.Player;
 
+import java.util.logging.Logger;
+
 @PlayerScoped
 public class CustomPlayer implements Disposable {
 
@@ -13,8 +15,8 @@ public class CustomPlayer implements Disposable {
     private int money = 0;
 
     @Inject
-    public CustomPlayer(Player player) {
-        System.out.println("CustomPlayer::new(\""+player.getUniqueId()+"\", \""+player.getName()+"\")");
+    public CustomPlayer(Player player, Logger logger) {
+        logger.info("CustomPlayer::new(\""+player.getUniqueId()+"\", \""+player.getName()+"\")");
         this.player = player;
     }
 

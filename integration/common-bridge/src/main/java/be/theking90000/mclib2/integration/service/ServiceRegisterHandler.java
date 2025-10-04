@@ -51,6 +51,5 @@ public class ServiceRegisterHandler implements AnnotationHandler<Object> {
     @Override
     public void destroy() throws Exception {
         serviceClasses.clear();
-        System.out.println("Destroying ServiceRegisterHandler");
     }
 }

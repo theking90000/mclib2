@@ -9,8 +9,11 @@ import com.google.inject.Module;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class GuiceModuleEntrypoint {
+
+    private static final Logger logger = Logger.getLogger(GuiceModuleEntrypoint.class.getName());
 
     private final AnnotationBootstrap bs;
 
@@ -24,9 +27,11 @@ public class GuiceModuleEntrypoint {
                 new GuiceModuleAnnotationHandlerFactory(modules)
         );
 
+        int m = modules.size();
+
         bs.bootstrap(ar);
 
-        System.out.println("Modules = " + modules.size());
+        logger.finer("Discovered " + (modules.size()-m) + " Guice Modules");
     }
 
     @PlatformDestroy

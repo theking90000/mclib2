@@ -7,15 +7,18 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import java.util.logging.Logger;
+
 @BukkitListener
 @PlayerScoped
 public class PlayerHitListener implements Listener {
 
     private final CustomPlayer player;
 
+
     @Inject
-    public PlayerHitListener(CustomPlayer player) {
-        System.out.println("PlayerHitListener::new("+player.getPlayer().getUniqueId()+")");
+    public PlayerHitListener(CustomPlayer player, Logger logger) {
+        logger.info("PlayerHitListener::new(\""+player.getPlayer().getUniqueId()+"\")");
         this.player = player;
     }
 

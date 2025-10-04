@@ -3,15 +3,19 @@ package be.theking90000.mclib2.test;
 import be.theking90000.mclib2.integration.guice.GuiceModule;
 import com.google.inject.AbstractModule;
 
+import java.util.logging.Logger;
+
 @GuiceModule
 public class TestModule extends AbstractModule {
 
+    private static final Logger LOGGER = Logger.getLogger("TestModule");
+
     public TestModule() {
-        System.out.println("TestModule::new()");
+        LOGGER.info("TestModule::new()");
     }
 
     @Override
     protected void configure() {
-        System.out.println("TestModule::configure()");
+        LOGGER.info("TestModule::configure()");
     }
 }
