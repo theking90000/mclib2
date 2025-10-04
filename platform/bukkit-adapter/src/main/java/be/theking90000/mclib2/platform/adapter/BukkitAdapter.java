@@ -25,7 +25,7 @@ public class BukkitAdapter extends JavaPlugin implements Runnable {
                 descriptor = PluginDescriptor.deserialize(in);
             }
 
-            PlatformBoot.register(descriptor, this, getClassLoader());
+            PlatformBoot.register(descriptor, this, getClassLoader(), getClassLoader());
         } catch (IOException | ClassNotFoundException e) {
             getLogger().severe("Failed to load plugin descriptor");
             e.printStackTrace();

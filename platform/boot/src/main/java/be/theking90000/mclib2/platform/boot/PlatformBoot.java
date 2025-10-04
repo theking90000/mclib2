@@ -56,13 +56,37 @@ public final class PlatformBoot {
      * @param descriptor the plugin descriptor
      * @param <T>        type of the custom data
      * @param customData optional custom data passed by the platform adapter (e.g. Bukkit's JavaPlugin instance)
+     * @param callerClassLoader the classloader of the caller
+     * @param rootCl     the root classloader to use for shared dependencies (usually the platform adapter's classloader)
+     * @return the number of dependencies loaded (excluding already loaded ones)
+     */
+    public static <T> int register(PluginDescriptor descriptor, T customData, ClassLoader callerClassLoader, ClassLoader rootCl) {
+        // PlatformBoot.class is loaded by the platform adapter's classloader;
+        // therefore, we pass it as the callerClassLoader
+        return PlatformSingleton.register(descriptor, customData, callerClassLoader, rootCl);
+    }
+
+    /**
+     * Registers and boots a plugin described by the given descriptor.
+     *
+     * <p>This will:</p>
+     * <ol>
+     *   <li>Resolve the plugin's libraries (shared vs isolated).</li>
+     *   <li>Create a {@link ClassLoader} for the plugin.</li>
+     *   <li>Load and instantiate the entrypoint class.</li>
+     *   <li>Call its lifecycle method (e.g. {@code onEnable()}).</li>
+     * </ol>
+     *
+     * @param descriptor the plugin descriptor
+     * @param <T>        type of the custom data
+     * @param customData optional custom data passed by the platform adapter (e.g. Bukkit's JavaPlugin instance)
      * @param rootCl     the root classloader to use for shared dependencies (usually the platform adapter's classloader)
      * @return the number of dependencies loaded (excluding already loaded ones)
      */
     public static <T> int register(PluginDescriptor descriptor, T customData, ClassLoader rootCl) {
         // PlatformBoot.class is loaded by the platform adapter's classloader;
         // therefore, we pass it as the callerClassLoader
-        return PlatformSingleton.register(descriptor, customData, PlatformBoot.class.getClassLoader(), rootCl);
+        return register(descriptor, customData, PlatformBoot.class.getClassLoader(), rootCl);
     }
 
     /**
