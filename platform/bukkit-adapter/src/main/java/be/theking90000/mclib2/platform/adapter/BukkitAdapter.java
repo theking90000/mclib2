@@ -6,6 +6,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 public class BukkitAdapter extends JavaPlugin implements Runnable {
 
@@ -15,7 +17,11 @@ public class BukkitAdapter extends JavaPlugin implements Runnable {
     public void onEnable() {
         getLogger().info("BukkitAdapter loading");
         try {
-            try (InputStream in = BukkitAdapter.class.getClassLoader().getResourceAsStream("plugin-descriptor.dat")) {
+            URL url = BukkitAdapter.class.getClassLoader().getResource("plugin-descriptor.dat");
+            assert url != null;
+            URLConnection conn = url.openConnection();
+            conn.setUseCaches(false);
+            try (InputStream in = conn.getInputStream()) {
                 descriptor = PluginDescriptor.deserialize(in);
             }
 

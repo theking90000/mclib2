@@ -3,11 +3,18 @@ package be.theking90000.mclib2.platform.boot;
 import be.theking90000.mclib2.platform.*;
 import be.theking90000.mclib2.platform.classpath.PlatformClasspath;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
 
 public class PlatformRegistry {
+
+    // Avoid error on unload where PlatformDestroy.class is not loaded
+    // It tries to load the class using classloader of embedded platform code
+    // BUT since the jar has been swapped, it fails.
+    // This preloads the class name so we can compare by name only.
+    private static final String PLATFORM_DESTROY_ANNOTATION = PlatformDestroy.class.getCanonicalName();
 
     private final Map<PluginDescriptor, RegisteredPlugin<?>> registeredPlugins = new HashMap<>();
     private final Set<RegisteredPlugin<?>> bootedPlugins = new HashSet<>();
@@ -196,9 +203,12 @@ public class PlatformRegistry {
         for (Object o : this.initializedEntrypoints.get(r)) {
             try {
                 for (Method m : o.getClass().getDeclaredMethods()) {
-                    if (m.isAnnotationPresent(PlatformDestroy.class)) {
-                        m.setAccessible(true);
-                        m.invoke(o);
+                    for (Annotation a : m.getDeclaredAnnotations()) {
+                        if(a.annotationType().getCanonicalName().equals(PLATFORM_DESTROY_ANNOTATION)) {
+                            m.setAccessible(true);
+                            m.invoke(o);
+                            break;
+                        }
                     }
                 }
             } catch (Exception e) {

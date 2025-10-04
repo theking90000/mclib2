@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,7 +35,9 @@ public class UnpackedDependency {
 
     private void addResource(URL url) throws IOException {
         if (url.getProtocol().equals("jar") || (url.getProtocol().equals("file") && url.getPath().endsWith(".jar"))) {
-            try (InputStream urlStream = url.openStream();
+            URLConnection conn = url.openConnection();
+            conn.setUseCaches(false);
+            try (InputStream urlStream = conn.getInputStream();
                  BufferedInputStream bufferedInputStream = new BufferedInputStream(urlStream);
                  JarInputStream jarInputStream = new JarInputStream(bufferedInputStream)) {
                 JarEntry jarEntry;

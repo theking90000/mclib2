@@ -54,11 +54,6 @@ public class PlayerListener implements Listener, Disposable {
             playerScope.enter(player.getUniqueId());
             playerScope.seed(Player.class, player);
 
-            // Initialize player-scoped Services, Listener, etc.
-            // Maybe use an init(Scope) GLOBAL method or interface
-            // And when a new Scope is entered (not necessarily a PlayerScope, but any Scope)
-            // the Injector calls init(Scope) every where it can.
-
             scopeManager.notifyScopeCreation(playerScope);
         } finally {
             playerScope.remove(player.getUniqueId());
