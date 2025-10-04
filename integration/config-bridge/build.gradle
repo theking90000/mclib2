@@ -1,5 +1,7 @@
 dependencies {
     api 'com.networknt:json-schema-validator:1.5.9'
+    // To link slf4j
+    implementation 'org.slf4j:slf4j-jdk14:2.0.17'
 
     api project(":integration:common-bridge")
     api project(":integration:config-api")
