@@ -72,6 +72,9 @@ public abstract class RunClassProcessorsTask extends DefaultTask {
                             .replace(File.separatorChar, '.')
                             .replaceAll("\\.class$", "");
 
+                    // Windows Fix : drive Letter (.*): in classname
+                    className = className.substring(className.indexOf(':') + 1);
+
                     if (className.startsWith(".")) {
                         className = className.substring(1);
                     }
@@ -91,7 +94,6 @@ public abstract class RunClassProcessorsTask extends DefaultTask {
 
         }
     }
-
 
     public static Path stripCommonPrefix(Path base, Path target) {
         // normalize to absolute so names line up
