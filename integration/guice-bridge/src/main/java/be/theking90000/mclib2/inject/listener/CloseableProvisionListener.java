@@ -12,8 +12,11 @@ import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class CloseableProvisionListener implements ProvisionListener {
+
+    private static final Logger logger = Logger.getLogger(CloseableProvisionListener.class.getName());
 
     private final CloseableRegistry registry;
 
@@ -50,7 +53,7 @@ public class CloseableProvisionListener implements ProvisionListener {
         Map<Key<?>, ArrayDeque<Object>> provisionInstances = registry.getProvisionInstances();
 
 
-        System.out.println("Provisioning " + provision.getBinding().getKey());
+        logger.finest("Provisioning " + provision.getBinding().getKey());
 
         // T instance = provision.provision();
 
@@ -89,7 +92,7 @@ public class CloseableProvisionListener implements ProvisionListener {
 
         // Collect stack as direct dependencies of the provisioned instance
         for (Dependency<?> dep : collectDependencies(provision.getBinding().getKey())) {
-            System.out.println("Binding dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
+            logger.finest("Binding dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
             ArrayDeque<Object> deq = provisionInstances.get(dep.getKey());
             Object o = null;
 
@@ -132,7 +135,7 @@ public class CloseableProvisionListener implements ProvisionListener {
             }
 
             if (o == null) {
-                System.out.println("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
+                logger.finest("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
                 // throw new IllegalStateException("No provisioned instance found for dependency " + dep.getKey() + " of " + provision.getBinding().getKey());
             } else {
                 registry.getDependencyGraph().addDependency(instance, o);
